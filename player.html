@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Radio Streaming Player</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      background:#f2f5fa; 
+      margin:0; 
+      padding:20px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+    }
+    .card {
+      background:white;
+      padding:20px;
+      border-radius:16px;
+      max-width:420px;
+      width:100%;
+      box-shadow:0 10px 25px rgba(0,0,0,0.08);
+      text-align:center;
+    }
+    h2 { margin-top:0; font-size:20px; }
+    #status { font-size:14px; margin-bottom:14px; color:#444; }
+    audio { width:100%; margin-top:10px; }
+    .note { font-size:12px; color:#666; margin-top:12px; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Live Radio Stream</h2>
+    <div id="status">Menunggu aksi pengguna...</div>
+
+    <audio id="player" controls preload="none" crossorigin="anonymous">
+      <source src="http://103.28.149.117:8050/stream" type="audio/mpeg">
+      Browser Anda tidak mendukung pemutar audio.
+    </audio>
+
+    <div class="note">
+      *Jika tidak berbunyi, tekan tombol Play.<br>
+      *Autoplay kadang diblokir oleh browser.
+    </div>
+  </div>
+
+  <script>
+    const player = document.getElementById('player');
+    const status = document.getElementById('status');
+
+    player.addEventListener('playing', () => {
+      status.textContent = "Status: Memutar 🔊";
+    });
+
+    player.addEventListener('pause', () => {
+      status.textContent = "Status: Dijeda ⏸️";
+    });
+
+    player.addEventListener('error', () => {
+      status.textContent = "Error: Tidak dapat memutar stream (CORS atau URL offline).";
+    });
+  </script>
+
+</body>
+</html>
