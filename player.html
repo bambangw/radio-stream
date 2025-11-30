@@ -1,90 +1,227 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Kenangan selalu diHati</title>
-  <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      background:#FFFFFF; 
-      margin:0; 
-      padding:20px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-    }
-    .card {
-      background:white;
-      padding:20px;
-      border-radius:16px;
-      max-width:420px;
-      width:100%;
-      box-shadow:0 10px 25px rgba(0,0,0,0.08);
-      text-align:center;
-    }
-    h2 { 
-      margin-top:0; 
-      font-size:35px;
-      color:#4CAF50;
-    }
-    #status { 
-      font-size:16px; 
-      margin-bottom:14px; 
-      color:#2196F3; 
-    }
-    audio { width:100%; margin-top:10px; }
-    .note { font-size:16px; color:#E91E63; margin-top:12px; }
-  </style>
+<meta charset="utf-8">
+<title>Haza Radio — Premium Wooden Player</title>
+
+<style>
+body {
+  background:#222;
+  font-family: Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
+
+/* === Radio Premium Box === */
+.radio-box {
+  width: 460px;
+  padding: 30px;
+  border-radius: 25px;
+  background: url('https://bambangw.github.io/radio-stream/logo2.jpg');
+  background-size: cover;
+  background-position:center;
+  box-shadow:
+    0 0 25px rgba(0,0,0,.6),
+    inset 0 0 40px rgba(0,0,0,.4);
+  border: 7px solid #3b2713;
+  text-align:center;
+  color:#f9e7c9;
+}
+
+/* === Judul === */
+.radio-title {
+  font-size:26px;
+  font-weight:bold;
+  margin-bottom:10px;
+  text-shadow:0 0 5px rgba(0,0,0,.7);
+}
+
+/* === Lampu indikator === */
+.light {
+  width:20px;
+  height:20px;
+  background:#800;
+  border-radius:50%;
+  margin:10px auto 20px;
+  box-shadow:0 0 10px #b00;
+}
+
+.light.on {
+  background:#3aff57;
+  box-shadow:0 0 12px #3aff57;
+}
+
+/* === Tombol Play/Pause === */
+.btn-pp {
+  width:95px;
+  height:95px;
+  background:#c49b63;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  font-size:30px;
+  box-shadow:
+    0 0 10px rgba(0,0,0,.6),
+    inset 0 0 12px rgba(255,255,255,.3);
+  margin:20px auto;
+  color:white;
+  transition:.2s;
+}
+
+.btn-pp:hover {
+  transform:scale(1.08);
+}
+
+/* === VU METER LED === */
+.vu-container {
+  display:flex;
+  justify-content:center;
+  gap:4px;
+  margin-top:25px;
+}
+
+.led {
+  width:8px;
+  height:30px;
+  background:#330000;
+  border-radius:3px;
+  transition:height .1s ease, background .1s ease;
+  box-shadow:0 0 3px #000;
+}
+</style>
 </head>
+
 <body>
 
-  <div class="card">
-    <h2>Haza Radio</h2>
-    <div id="status">Service Laptop Jogja</div>
+<div class="radio-box">
 
-    <audio id="player" controls preload="auto" autoplay crossorigin="anonymous">
-      <source src="https://b.alhastream.com:5044/radio" type="audio/mpeg">
-      Browser Anda tidak mendukung pemutar audio.
-    </audio>
+  <div class="radio-title">📻 Musik Nostalgia</div>
 
-    <div class="note">
-      Lagu kenangan terus mengalun menemani Anda.<br>
-    </div>
+  <div id="lamp" class="light"></div>
+
+  <div id="ppBtn" class="btn-pp">▶</div>
+
+  <!-- VU METER -->
+  <div class="vu-container">
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
   </div>
 
-  <script>
-    const player = document.getElementById('player');
-    const status = document.getElementById('status');
+  <audio id="radio" preload="auto" crossorigin="anonymous"></audio>
 
-    // Coba autoplay dengan suara
-    window.addEventListener('load', () => {
-      player.play().catch(() => {
-        status.textContent = "Play otomatis tidak diizinkan.";
-      });
-    });
+</div>
 
-    player.addEventListener('playing', () => {
-      status.textContent = "Santai bersama Kami 🔊";
-    });
+<script>
+// === KONFIGURASI ===
+const STREAM_URL = "https://b.alhastream.com:5044/radio";
+const RETRY_DELAY = 3000;
 
-    player.addEventListener('pause', () => {
-      status.textContent = "Laptop trobel WA saja 08562590084";
-    });
+const audio = document.getElementById("radio");
+audio.src = STREAM_URL;
 
-    player.addEventListener('error', () => {
-      status.textContent = "Error: Tidak dapat memutar stream.";
+let audioCtx, sourceNode, analyser, dataArray;
+let isPlaying = false;
+
+let lamp = document.getElementById("lamp");
+let btn = document.getElementById("ppBtn");
+let leds = document.querySelectorAll(".led");
+
+// === START / PAUSE ===
+btn.onclick = () => {
+  if (!audioCtx) {
+    setupAudio();
+  }
+
+  if (!isPlaying) {
+    audio.play();
+    lamp.classList.add("on");
+    btn.textContent = "⏸";
+    isPlaying = true;
+  } else {
+    audio.pause();
+    lamp.classList.remove("on");
+    btn.textContent = "▶";
+    isPlaying = false;
+  }
+};
+
+// === SETUP AUDIO + ANALYSER (VU METER) ===
+function setupAudio() {
+  audioCtx = new AudioContext({ latencyHint:"playback" });
+  sourceNode = audioCtx.createMediaElementSource(audio);
+
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 64;
+
+  dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+  sourceNode.connect(analyser);
+  analyser.connect(audioCtx.destination);
+
+  animateVU();
+}
+
+// === ANIMATE VU METER ===
+function animateVU() {
+  requestAnimationFrame(animateVU);
+
+  if (!analyser) return;
+
+  analyser.getByteFrequencyData(dataArray);
+  let slice = dataArray.slice(0, leds.length);
+
+  slice.forEach((val, i) => {
+    let h = (val / 255) * 30;
+    leds[i].style.height = (10 + h) + "px";
+
+    leds[i].style.background = val > 180 ? "#ff0000" :
+                               val > 120 ? "#ffaa00" :
+                               val > 60  ? "#33ff33" :
+                                           "#225500";
+  });
+}
+
+// === RECONNECT ===
+function reconnect() {
+  lamp.classList.remove("on");
+  isPlaying = false;
+  btn.textContent = "▶";
+
+  audio.pause();
+  audio.src = STREAM_URL;
+  audio.load();
+
+  setTimeout(() => {
+    audio.play().then(() => {
+      lamp.classList.add("on");
+      btn.textContent = "⏸";
+      isPlaying = true;
     });
-  </script>
+  }, 700);
+}
+
+// === DETEKSI GANGGUAN ===
+audio.addEventListener("error", () => setTimeout(reconnect, RETRY_DELAY));
+audio.addEventListener("stalled", () => setTimeout(reconnect, RETRY_DELAY));
+audio.addEventListener("ended", () => setTimeout(reconnect, RETRY_DELAY));
+
+// === KEEP ALIVE ===
+setInterval(() => {
+  if (audio.readyState < 2 || audio.paused) reconnect();
+}, 10000);
+</script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
