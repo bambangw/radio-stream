@@ -149,7 +149,7 @@ const auth = getAuth(app);
 /* ============================
    GLOBALS / STREAM SETUP
 ============================ */
-const STREAM_URL = "http://103.28.149.117:8050/stream";
+const STREAM_URL = "https://b.alhastream.com:5044/radio";
 const RETRY_DELAY = 3000;
 const audio = document.getElementById("radio");
 audio.src = STREAM_URL;
@@ -349,3 +349,4 @@ chatInput.addEventListener('focus', ()=> { if (!audioCtx) setupAudio(); });
 </script>
 </body>
 </html>
+
