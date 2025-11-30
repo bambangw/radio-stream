@@ -1,352 +1,222 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Haza Radio — Premium + Chat Publik</title>
+<meta charset="utf-8">
+<title>Haza Radio — Premium Wood Classic Player</title>
+
 <style>
-/* ====== STYLING PLAYER (Wood Premium) ====== */
 body {
-  background:#222;
-  font-family: Arial, sans-serif;
+  font-family: 'Arial', sans-serif;
+  background:#1a1a1a;
+  margin:0;
+  padding:40px;
   display:flex;
   justify-content:center;
-  padding:28px;
-  color:#f9e7c9;
+  align-items:center;
 }
-.container {
-  width: 480px;
-}
-/* Radio box */
+
+/* ---- BOX RADIO KAYU PREMIUM ---- */
 .radio-box {
-  padding: 24px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(60,40,25,0.95), rgba(45,30,18,0.98));
-  box-shadow: 0 6px 30px rgba(0,0,0,0.6), inset 0 0 40px rgba(0,0,0,0.2);
-  border: 6px solid #3b2713;
+  width: 460px;
+  padding: 30px;
+  border-radius: 25px;
+  background: url('https://bambangw.github.io/radio-stream/logo2.jpg');
+  background-size: cover;
+  box-shadow: 0 0 35px rgba(0,0,0,.7), inset 0 0 15px rgba(0,0,0,.5);
+  border: 7px solid #3d2b17;
   text-align:center;
-  color:#f9e7c9;
+  backdrop-filter: blur(2px);
 }
-.radio-title { font-size:22px; font-weight:700; margin-bottom:6px; }
-.light { width:18px; height:18px; background:#5b0000; border-radius:50%; margin:10px auto; box-shadow:0 0 6px #600; }
-.light.on { background:#29ff6b; box-shadow:0 0 10px #29ff6b; }
 
-/* Play/Pause */
-.btn-pp {
-  width:86px; height:86px; border-radius:50%;
-  background: linear-gradient(180deg,#c29a62,#a7712c);
-  display:flex; align-items:center; justify-content:center;
-  font-size:30px; color:#fff; margin:18px auto;
-  cursor:pointer; box-shadow: 0 8px 16px rgba(0,0,0,0.6), inset 0 -6px 14px rgba(255,255,255,0.08);
-  transition: transform .14s ease;
+/* ---- TITLE ---- */
+.radio-title {
+  font-size:28px;
+  color:#ffebc4;
+  margin-bottom:15px;
+  text-shadow:0 0 6px rgba(0,0,0,.7);
 }
-.btn-pp:active{ transform: scale(.96); }
 
-/* VU Meter */
-.vu-container { display:flex; justify-content:center; gap:6px; margin-top:18px; }
-.led { width:10px; height:28px; background:#220600; border-radius:3px; transition: height .08s linear, background .08s linear; }
-
-/* ====== CHAT BOX ====== */
-.chat-box {
-  background: rgba(10,10,10,0.55);
-  margin-top: 18px;
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 4px 18px rgba(0,0,0,0.6);
-  color: #fff;
+/* ---- LAMPU ON AIR ---- */
+.light {
+  width:20px;
+  height:20px;
+  background:#a00;
+  border-radius:50%;
+  margin:10px auto 20px;
+  box-shadow:0 0 12px #600;
 }
-.chat-title { font-size:16px; font-weight:700; margin-bottom:8px; text-align:center; color:#ffecc9; }
-.chat-window {
-  background: rgba(0,0,0,0.32);
-  height:250px; overflow-y:auto; border-radius:8px; padding:10px; font-size:14px;
-  border:1px solid rgba(255,255,255,0.03);
+
+.light.on {
+  background:#3aff57;
+  box-shadow:0 0 15px #3aff57;
 }
-.chat-msg { padding:6px 8px; margin-bottom:6px; border-radius:6px; background: rgba(255,255,255,0.02); }
-.chat-msg b { color:#ffdca6; }
-.chat-meta { color:#bdbdbd; font-size:12px; float:right; }
-.chat-input-area { display:flex; gap:8px; margin-top:10px; }
-.chat-input { flex:1; padding:10px; border-radius:8px; border:none; font-size:14px; background:rgba(255,255,255,0.03); color:#fff }
-.chat-btn { padding:10px 14px; border-radius:8px; background:#29ff6b; color:#000; font-weight:700; border:none; cursor:pointer; }
-.chat-btn:active{ transform:scale(.98); }
-.nickname-row { display:flex; gap:8px; margin-bottom:10px; align-items:center; justify-content:center; }
-.nick-input { padding:8px 10px; border-radius:8px; border:none; background:rgba(255,255,255,0.03); color:#fff; }
 
-/* small */
-.small { font-size:12px; opacity:0.8; color:#cfcfcf; text-align:center; margin-top:8px; }
+/* ---- TOMBOL PLAY / PAUSE ---- */
+.btn {
+  width:90px;
+  height:90px;
+  background:#c49a60;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  color:#fff;
+  font-size:32px;
+  font-weight:bold;
+  margin:25px auto;
+  box-shadow:0 0 12px rgba(0,0,0,.5), inset 0 0 12px rgba(255,255,255,.25);
+  transition:.2s;
+}
+.btn:hover { transform:scale(1.1); }
 
-/* responsive */
-@media (max-width:520px){
-  .container { width:100%; padding:12px; }
+/* ---- VU METER LED ---- */
+.vu-wrapper {
+  display:flex;
+  justify-content:center;
+  margin-top:20px;
+}
+
+.led {
+  width:10px;
+  height:40px;
+  background:#222;
+  margin:0 2px;
+  border-radius:4px;
+  box-shadow: inset 0 0 6px rgba(0,0,0,.7);
+  transition:0.1s;
+}
+
+.note {
+  margin-top:20px;
+  font-size:12px;
+  color:#fff;
+  opacity:.7;
 }
 </style>
 </head>
+
 <body>
-<div class="container">
 
-  <!-- ===== PLAYER ===== -->
-  <div class="radio-box" id="playerBox">
-    <div class="radio-title">📻 Haza Radio Premium</div>
-    <div id="lamp" class="light"></div>
+<div class="radio-box">
 
-    <div id="ppBtn" class="btn-pp" title="Play / Pause">▶</div>
+  <div class="radio-title">📻 Haza Radio Premium</div>
 
-    <div class="vu-container" aria-hidden="true">
-      <div class="led"></div><div class="led"></div><div class="led"></div>
-      <div class="led"></div><div class="led"></div><div class="led"></div>
-      <div class="led"></div>
-    </div>
+  <div id="lamp" class="light"></div>
 
-    <audio id="radio" preload="auto" crossorigin="anonymous"></audio>
+  <div id="playbtn" class="btn">▶</div>
 
-    <div class="small">Auto-reconnect • Buffer besar • Chat publik</div>
+  <!-- VU METER -->
+  <div class="vu-wrapper">
+    <div class="led" id="l1"></div>
+    <div class="led" id="l2"></div>
+    <div class="led" id="l3"></div>
+    <div class="led" id="l4"></div>
+    <div class="led" id="l5"></div>
+    <div class="led" id="l6"></div>
+    <div class="led" id="l7"></div>
+    <div class="led" id="l8"></div>
+    <div class="led" id="l9"></div>
+    <div class="led" id="l10"></div>
   </div>
 
-  <!-- ===== CHAT ===== -->
-  <div class="chat-box" id="chatBox">
-    <div class="chat-title">💬 Ruang Sapa Pendengar (Publik)</div>
+  <div class="note">Streaming Retro Premium — Auto Reconnect + VU Visualizer</div>
 
-    <div class="nickname-row" id="nickRow">
-      <input id="nickInput" class="nick-input" type="text" placeholder="Masukkan nama (opsional)" maxlength="30">
-      <button id="setNick" class="chat-btn">Simpan</button>
-    </div>
+  <audio id="radio" preload="auto" crossorigin="anonymous"></audio>
 
-    <div id="chatWindow" class="chat-window" aria-live="polite"></div>
-
-    <div class="chat-input-area">
-      <input id="chatInput" class="chat-input" type="text" placeholder="Tulis pesan & tekan Enter..." maxlength="500" />
-      <button id="chatSend" class="chat-btn">Kirim</button>
-    </div>
-
-    <div class="small">Pesan disiarkan publik. Jaga sopan santun.</div>
-  </div>
 </div>
 
-<!-- ====== SCRIPTS ====== -->
-<script type="module">
-/* ============================
-   CONFIGURE FIREBASE
-   - Ganti firebaseConfig dengan config project-mu
-   - Pastikan Realtime DB & Anonymous Auth aktif
-============================ */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, serverTimestamp, set, onDisconnect, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "FIREBASE_APIKEY",
-  authDomain: "FIREBASE_AUTHDOMAIN",
-  databaseURL: "FIREBASE_DATABASEURL",
-  projectId: "FIREBASE_PROJECTID",
-  appId: "FIREBASE_APPID"
-  // isi sesuai config project-mu
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-
-/* ============================
-   GLOBALS / STREAM SETUP
-============================ */
+<script>
+// === STREAM CONFIG ===
 const STREAM_URL = "https://b.alhastream.com:5044/radio";
 const RETRY_DELAY = 3000;
 const audio = document.getElementById("radio");
 audio.src = STREAM_URL;
 
 let audioCtx, sourceNode, analyser, dataArray;
-let isPlaying = false;
+let playing = false;
 
 const lamp = document.getElementById("lamp");
-const ppBtn = document.getElementById("ppBtn");
-const leds = document.querySelectorAll(".led");
+const playBtn = document.getElementById("playbtn");
 
-const chatWindow = document.getElementById("chatWindow");
-const chatInput = document.getElementById("chatInput");
-const chatSend = document.getElementById("chatSend");
-const nickInput = document.getElementById("nickInput");
-const setNick = document.getElementById("setNick");
+// === START / PAUSE ===
+playBtn.onclick = function() {
+    if (!playing) startRadio();
+    else pauseRadio();
+};
 
-/* ============================
-   ANTI-SPAM CLIENT SIDE
-============================ */
-let lastSentAt = 0;
-function canSend(){
-  const now = Date.now();
-  if (now - lastSentAt < 2500) return false; // 2.5s throttle
-  lastSentAt = now;
-  return true;
-}
+function startRadio() {
+    if (!audioCtx) {
+        audioCtx = new AudioContext({ latencyHint:"playback" });
+        sourceNode = audioCtx.createMediaElementSource(audio);
 
-/* ============================
-   ANTI-XSS helper (escape)
-============================ */
-function escapeHtml(str){
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
 
-/* ============================
-   AUTHENTICATE ANONYMOUSLY
-============================ */
-signInAnonymously(auth).catch(err => {
-  console.error("Firebase auth error:", err);
-});
+        sourceNode.connect(analyser);
+        analyser.connect(audioCtx.destination);
 
-onAuthStateChanged(auth, user => {
-  if (user) {
-    const uid = user.uid;
-    // set presence
-    const presRef = ref(db, 'chat/presence/' + uid);
-    set(presRef, { ts: serverTimestamp(), uid }).catch(()=>{});
-    onDisconnect(presRef).remove();
-
-    // optionally show default nickname if stored in localStorage
-    const saved = localStorage.getItem('haza_nick');
-    if (saved) nickInput.value = saved;
-  }
-});
-
-/* ============================
-   CHAT: push & listen
-============================ */
-const messagesRef = ref(db, 'chat/messages');
-
-function sendMessage(text){
-  if (!text || !text.trim()) return;
-  if (!canSend()) {
-    alert("Tunggu sebentar sebelum mengirim lagi.");
-    return;
-  }
-
-  const name = nickInput.value ? nickInput.value.trim().slice(0,30) : "Pendengar";
-  const payload = { name: escapeHtml(name), text: escapeHtml(text.trim()), ts: serverTimestamp() };
-
-  // push message
-  push(messagesRef, payload).catch(err => {
-    console.error("Gagal kirim:", err);
-    alert("Gagal mengirim pesan (cek koneksi).");
-  });
-}
-
-// listen last 200 messages
-const q = query(messagesRef, limitToLast(200));
-onChildAdded(q, snapshot => {
-  const data = snapshot.val();
-  if (!data) return;
-  // render safely (we already escaped on write, but double-safety)
-  const name = escapeHtml(data.name || "Pendengar");
-  const text = escapeHtml(data.text || "");
-  const date = data.ts ? new Date(data.ts) : new Date();
-  const time = date.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-
-  const div = document.createElement('div');
-  div.className = "chat-msg";
-  div.innerHTML = `<b>${name}</b> <span class="chat-meta">${time}</span><div style="margin-top:6px">${text}</div>`;
-
-  chatWindow.appendChild(div);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-});
-
-/* send events */
-chatSend.addEventListener('click', ()=> {
-  sendMessage(chatInput.value);
-  chatInput.value = "";
-});
-chatInput.addEventListener('keydown', e => { if (e.key === 'Enter'){ sendMessage(chatInput.value); chatInput.value = ""; } });
-
-setNick.addEventListener('click', ()=> {
-  const v = nickInput.value.trim().slice(0,30);
-  if (!v) { localStorage.removeItem('haza_nick'); alert("Nama dihapus, akan tampil 'Pendengar'."); }
-  else { localStorage.setItem('haza_nick', v); alert("Nama tersimpan."); }
-});
-
-/* ============================
-   AUDIO: setup WebAudio + VU meter
-============================ */
-function setupAudio(){
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint:'playback' });
-    sourceNode = audioCtx.createMediaElementSource(audio);
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 64;
-    dataArray = new Uint8Array(analyser.frequencyBinCount);
-    sourceNode.connect(analyser);
-    analyser.connect(audioCtx.destination);
-    requestAnimationFrame(animateVU);
-  } catch(e){
-    console.warn("WebAudio not available:", e);
-  }
-}
-
-function animateVU(){
-  requestAnimationFrame(animateVU);
-  if (!analyser) return;
-  analyser.getByteFrequencyData(dataArray);
-  // map to leds
-  for (let i=0; i<leds.length; i++){
-    const val = dataArray[i] || 0;
-    const h = 6 + Math.round((val / 255) * 30);
-    leds[i].style.height = h + 'px';
-    leds[i].style.background = val > 190 ? '#ff0000' : val > 120 ? '#ffae24' : val > 60 ? '#39ff6f' : '#224400';
-  }
-}
-
-/* ======== PLAY / PAUSE / RECONNECT ======== */
-ppBtn.addEventListener('click', async ()=>{
-  if (!audioCtx) setupAudio();
-
-  if (!isPlaying) {
-    try {
-      await audio.play();
-      isPlaying = true;
-      lamp.classList.add('on');
-      ppBtn.textContent = '⏸';
-    } catch(e){
-      console.warn('Play blocked', e);
-      alert('Klik Play lagi jika browser menolak autoplay.');
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
     }
-  } else {
-    audio.pause();
-    isPlaying = false;
-    lamp.classList.remove('on');
-    ppBtn.textContent = '▶';
-  }
-});
 
-function reconnect() {
-  try {
-    audio.pause();
-    audio.src = STREAM_URL + (STREAM_URL.indexOf('?') === -1 ? '?r=' : '&r=') + Date.now(); // cache-bust
-    audio.load();
-    setTimeout(()=> { audio.play().catch(()=>{}); }, 600);
-    isPlaying = true;
-    lamp.classList.add('on');
-    ppBtn.textContent = '⏸';
-  } catch(e){
-    console.error(e);
-  }
+    audio.play().then(() => {
+        playing = true;
+        lamp.classList.add("on");
+        playBtn.innerHTML = "⏸";
+    });
 }
 
-audio.addEventListener('error', ()=> { setTimeout(reconnect, RETRY_DELAY); });
-audio.addEventListener('stalled', ()=> { setTimeout(reconnect, RETRY_DELAY); });
-audio.addEventListener('ended', ()=> { setTimeout(reconnect, RETRY_DELAY); });
+function pauseRadio() {
+    audio.pause();
+    playing = false;
+    lamp.classList.remove("on");
+    playBtn.innerHTML = "▶";
+}
 
-/* periodic keep-alive check */
-setInterval(()=>{
-  if (!isPlaying || audio.readyState < 2) {
-    reconnect();
-  }
+// === AUTO RECONNECT ===
+function reconnect() {
+  lamp.classList.remove("on");
+  audio.pause();
+  audio.src = STREAM_URL;
+  audio.load();
+
+  setTimeout(() => {
+    audio.play().then(() => {
+      lamp.classList.add("on");
+      playBtn.innerHTML = "⏸";
+      playing = true;
+    });
+  }, 600);
+}
+
+audio.addEventListener("error", () => setTimeout(reconnect, RETRY_DELAY));
+audio.addEventListener("stalled", () => setTimeout(reconnect, RETRY_DELAY));
+audio.addEventListener("ended", () => setTimeout(reconnect, RETRY_DELAY));
+
+setInterval(() => {
+  if (audio.readyState < 2 || audio.paused && playing) reconnect();
 }, 10000);
 
-/* auto-setup audio when user interacts with chat (gesture) */
-chatInput.addEventListener('focus', ()=> { if (!audioCtx) setupAudio(); });
+// === VU METER ===
+const leds = [];
+for (let i=1; i<=10; i++) leds.push(document.getElementById("l"+i));
 
+function animateVU() {
+  requestAnimationFrame(animateVU);
+
+  if (!analyser) return;
+
+  analyser.getByteFrequencyData(dataArray);
+  let level = Math.floor((dataArray[2] + dataArray[5] + dataArray[10]) / 3 / 25);
+  if (level > 10) level = 10;
+
+  leds.forEach((led, index) => {
+    if (index < level) led.style.background = "#3aff57";
+    else led.style.background = "#222";
+  });
+}
+animateVU();
 </script>
+
 </body>
 </html>
-
