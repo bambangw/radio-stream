@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<title>Haza Radio — Premium Wooden Player (Realtime Chat)</title>
+<title>Haza Radio — Premium Wooden Player</title>
 
 <style>
 body {
@@ -10,10 +10,9 @@ body {
   font-family: Arial, sans-serif;
   display:flex;
   justify-content:center;
-  align-items:flex-start;
+  align-items:center;
   height:100vh;
   margin:0;
-  padding-top:20px;
 }
 
 /* === Radio Premium Box === */
@@ -94,85 +93,11 @@ body {
   transition:height .1s ease, background .1s ease;
   box-shadow:0 0 3px #000;
 }
-
-/* === CHAT PENDENGAR === */
-.chat-box {
-  width:460px;
-  margin-top:20px;
-  padding:15px;
-  border-radius:12px;
-  background:#333;
-  color:white;
-  box-shadow:0 0 15px rgba(0,0,0,.5);
-  font-size:14px;
-}
-
-.chat-header {
-  display:flex;
-  gap:8px;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:8px;
-}
-
-.chat-messages {
-  height:220px;
-  overflow-y:auto;
-  background:#111;
-  padding:10px;
-  border-radius:10px;
-  margin-bottom:10px;
-}
-
-.msg {
-  margin-bottom:8px;
-  padding:6px 8px;
-  background:#222;
-  border-radius:6px;
-  word-break:break-word;
-}
-
-.msg .meta {
-  font-size:12px;
-  opacity:0.7;
-  margin-bottom:4px;
-}
-
-.chat-input {
-  display:flex;
-  gap:5px;
-}
-
-.chat-input input[type="text"] {
-  flex:1;
-  padding:10px;
-  border-radius:8px;
-  border:none;
-}
-
-.chat-input button {
-  padding:10px 15px;
-  border:none;
-  border-radius:8px;
-  background:#4caf50;
-  color:white;
-  cursor:pointer;
-}
-
-.chat-input button:hover {
-  background:#6bd46c;
-}
-
-.small {
-  font-size:12px;
-  opacity:0.8;
-}
 </style>
 </head>
 
 <body>
 
-<div>
 <div class="radio-box">
 
   <div class="radio-title">📻 Musik Nostalgia</div>
@@ -183,43 +108,23 @@ body {
 
   <!-- VU METER -->
   <div class="vu-container">
-    <div class="led"></div><div class="led"></div><div class="led"></div>
-    <div class="led"></div><div class="led"></div><div class="led"></div>
-    <div class="led"></div><div class="led"></div><div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
   </div>
 
   <audio id="radio" preload="auto" crossorigin="anonymous"></audio>
 
 </div>
 
-<!-- ================= CHAT PENDENGAR REALTIME (FIREBASE) ================= -->
-<div class="chat-box" id="chatBoxRoot">
-  <div class="chat-header">
-    <div style="font-size:18px;">💬 Chat Pendengar</div>
-    <div class="small">Realtime · Firebase</div>
-  </div>
-
-  <div id="chatMessages" class="chat-messages"></div>
-
-  <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-    <input id="nick" type="text" placeholder="Nama (opsional)" style="padding:8px;border-radius:8px;border:none;width:160px" />
-    <div class="small" style="opacity:0.9">Aturan singkat: tidak spam, sopan</div>
-  </div>
-
-  <div class="chat-input">
-    <input id="chatText" type="text" placeholder="Ketik pesan..." />
-    <button id="btnSend">Kirim</button>
-  </div>
-</div>
-
-</div>
-
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-database-compat.js"></script>
-
 <script>
-// === KONFIGURASI STREAM (TIDAK DIUBAH) ===
+// === KONFIGURASI ===
 const STREAM_URL = "https://b.alhastream.com:5044/radio";
 const RETRY_DELAY = 3000;
 
@@ -281,9 +186,9 @@ function animateVU() {
     let h = (val / 255) * 30;
     leds[i].style.height = (10 + h) + "px";
 
-    leds[i].style.background = val > 180 ? "#ff0000" :
-                               val > 120 ? "#ffaa00" :
-                               val > 60  ? "#33ff33" :
+    leds[i].style.background = val > 180 ? "#33ff33" :
+                               val > 120 ? "#ff0000" :
+                               val > 60  ? "#0000FF" :
                                            "#225500";
   });
 }
@@ -316,131 +221,6 @@ audio.addEventListener("ended", () => setTimeout(reconnect, RETRY_DELAY));
 setInterval(() => {
   if (audio.readyState < 2 || audio.paused) reconnect();
 }, 10000);
-
-
-/* =====================================================
-             BAGIAN CHAT REALTIME - FIREBASE
-   ===================================================== */
-
-/*
-  Langkah singkat sebelum pakai:
-  1) Buat Firebase project di https://console.firebase.google.com
-  2) Pada project: Build -> Realtime Database -> Create database -> pilih lokasi
-  3) Pilih mode "test" (mudah) atau "locked" (produksi). Saya sertakan aturan contoh di bawah.
-  4) Salin konfigurasi firebaseConfig dan masukkan ke variabel di bawah.
-*/
-
-//// === ISI KONFIG FIREBASE DISINI === ////
-const firebaseConfig = {
-  apiKey: "API_KEY_HERE",
-  authDomain: "PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId: "PROJECT_ID",
-  storageBucket: "PROJECT_ID.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId: "APP_ID"
-};
-// <-- Ganti semua field di atas sesuai Firebase Console
-//// =================================== ////
-
-// Inisialisasi Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const chatRef = db.ref("chats"); // node tempat menyimpan chat
-
-const chatBox = document.getElementById("chatMessages");
-const chatInput = document.getElementById("chatText");
-const nickInput = document.getElementById("nick");
-const btnSend = document.getElementById("btnSend");
-
-// Escaping sederhana untuk mencegah HTML injection
-function escapeHtml(str) {
-  return str.replace(/[&<>"'\/]/g, function (s) {
-    const entityMap = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "/": "&#x2F;" };
-    return entityMap[s];
-  });
-}
-
-// Menampilkan pesan ke UI
-function renderMessage(data) {
-  const msg = data.val();
-  const key = data.key;
-  if (!msg || !msg.text) return;
-
-  const div = document.createElement("div");
-  div.className = "msg";
-  const name = escapeHtml(msg.nick || "Pendengar");
-  const time = new Date(msg.ts || Date.now()).toLocaleTimeString();
-
-  div.innerHTML = `<div class="meta">${name} · ${time}</div><div class="text">${escapeHtml(msg.text)}</div>`;
-  div.id = "msg-" + key;
-
-  // tambahkan ke chatBox (urut ascending)
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-// Hapus pesan UI (dipakai jika pesan dihapus dari DB)
-function removeMessageUI(key) {
-  const el = document.getElementById("msg-" + key);
-  if (el) el.remove();
-}
-
-// Listen penambahan chat baru (realtime)
-chatRef.limitToLast(200).on("child_added", snapshot => {
-  renderMessage(snapshot);
-});
-
-// Listen perubahan (jika ingin mendukung edit) — optional
-chatRef.on("child_changed", snapshot => {
-  // sederhana: replace node lama
-  const exist = document.getElementById("msg-" + snapshot.key);
-  if (exist) exist.remove();
-  renderMessage(snapshot);
-});
-
-// Listen penghapusan
-chatRef.on("child_removed", snapshot => {
-  removeMessageUI(snapshot.key);
-});
-
-// Fungsi kirim pesan
-function sendChatFirebase() {
-  const text = chatInput.value.trim();
-  if (!text) return;
-
-  // pembatas sederhana: max 500 char
-  if (text.length > 500) {
-    alert("Pesan maksimal 500 karakter.");
-    return;
-  }
-
-  const nick = nickInput.value.trim() || "Pendengar";
-  const payload = {
-    nick: nick,
-    text: text,
-    ts: Date.now()
-  };
-
-  // push ke firebase
-  const newRef = chatRef.push();
-  newRef.set(payload, (err) => {
-    if (err) {
-      console.error("Gagal kirim:", err);
-      alert("Gagal mengirim pesan. Coba lagi.");
-    } else {
-      chatInput.value = "";
-    }
-  });
-}
-
-btnSend.addEventListener("click", sendChatFirebase);
-chatInput.addEventListener("keypress", e => {
-  if (e.key === "Enter") sendChatFirebase();
-});
-
-/* Optional: clear chatBox dan load ulang (misal saat reconnect).
-   Namun realtime listener sudah sinkron otomatis. */
 </script>
 
 </body>
