@@ -113,6 +113,15 @@ body {
   display:none;">
   Buffering 0%
 </div>
+<div id="bitrateStatus" style="
+  margin-top:4px;
+  font-size:13px;
+  color:#9dff9d;
+  text-shadow:0 0 5px #000;
+  display:none;">
+  Bitrate: -- kbps
+</div>
+
 
 
   <!-- VU METER -->
@@ -276,6 +285,62 @@ setInterval(() => {
   if (audio.currentTime === lastTime) scheduleReconnect();
   lastTime = audio.currentTime;
 }, FREEZE_TIME);
+
+// ================= BITRATE ESTIMATOR =================
+const bitrateTxt = document.getElementById("bitrateStatus");
+
+let lastBytes = 0;
+let lastBitrateTime = Date.now();
+
+function showBitrate(kbps) {
+  bitrateTxt.style.display = "block";
+  bitrateTxt.textContent = `Bitrate: ${kbps} kbps`;
+}
+
+function hideBitrate() {
+  bitrateTxt.style.display = "none";
+}
+
+// Estimasi bitrate dari buffered data
+setInterval(() => {
+  if (!audio || audio.readyState < 2 || audio.paused) return;
+
+  try {
+    if (audio.buffered.length) {
+      const bufferedEnd = audio.buffered.end(0);
+      const now = Date.now();
+      const deltaTime = (now - lastBitrateTime) / 1000;
+
+      if (deltaTime > 0) {
+        // asumsi audio 16-bit stereo
+        const estimatedBytes =
+          bufferedEnd * 44100 * 2 * 2;
+
+        const deltaBytes = estimatedBytes - lastBytes;
+        const kbps = Math.max(
+          32,
+          Math.round((deltaBytes * 8) / 1000 / deltaTime)
+        );
+
+        showBitrate(kbps);
+
+        lastBytes = estimatedBytes;
+        lastBitrateTime = now;
+      }
+    }
+  } catch {}
+}, 2000);
+
+// ================= EVENT HANDLING =================
+audio.addEventListener("playing", () => {
+  bitrateTxt.style.display = "block";
+});
+
+audio.addEventListener("waiting", hideBitrate);
+audio.addEventListener("stalled", hideBitrate);
+audio.addEventListener("error", hideBitrate);
+audio.addEventListener("ended", hideBitrate);
+
 </script>
 
 
