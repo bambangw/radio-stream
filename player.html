@@ -105,6 +105,15 @@ body {
   <div id="lamp" class="light"></div>
 
   <div id="ppBtn" class="btn-pp">▶</div>
+<div id="bufferStatus" style="
+  margin-top:10px;
+  font-size:14px;
+  color:#ffe9b3;
+  text-shadow:0 0 5px #000;
+  display:none;">
+  Buffering 0%
+</div>
+
 
   <!-- VU METER -->
   <div class="vu-container">
@@ -127,15 +136,16 @@ body {
 // ================= KONFIGURASI =================
 const STREAM_URL = "https://b.alhastream.com:5044/radio";
 
-const RETRY_BASE = 3000;      // 3 detik awal
-const RETRY_MAX  = 30000;     // max 30 detik
-const FREEZE_TIME = 15000;    // 15 detik audio diam = reconnect
+const RETRY_BASE = 3000;
+const RETRY_MAX  = 30000;
+const FREEZE_TIME = 15000;
 
 // ================= ELEMENT =================
 const audio = document.getElementById("radio");
 const lamp  = document.getElementById("lamp");
 const btn   = document.getElementById("ppBtn");
 const leds  = document.querySelectorAll(".led");
+const bufferTxt = document.getElementById("bufferStatus");
 
 audio.src = STREAM_URL;
 audio.preload = "none";
@@ -151,12 +161,10 @@ btn.onclick = async () => {
   if (!audioCtx) setupAudio();
 
   if (!isPlaying) {
+    showBuffer(0);
     try {
       await audio.play();
-      lamp.classList.add("on");
-      btn.textContent = "⏸";
-      isPlaying = true;
-    } catch (e) {
+    } catch {
       scheduleReconnect();
     }
   } else {
@@ -170,7 +178,7 @@ btn.onclick = async () => {
 // ================= AUDIO CONTEXT =================
 function setupAudio() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)({
-    latencyHint: "playback"
+    latencyHint:"playback"
   });
 
   sourceNode = audioCtx.createMediaElementSource(audio);
@@ -191,12 +199,10 @@ function animateVU() {
   if (!analyser || !isPlaying) return;
 
   analyser.getByteFrequencyData(dataArray);
-
   leds.forEach((led, i) => {
     let v = dataArray[i] || 0;
     let h = 10 + (v / 255) * 30;
     led.style.height = h + "px";
-
     led.style.background =
       v > 180 ? "#33ff33" :
       v > 120 ? "#ff0000" :
@@ -205,29 +211,36 @@ function animateVU() {
   });
 }
 
-// ================= RECONNECT CORE =================
+// ================= BUFFER DISPLAY =================
+function showBuffer(p) {
+  bufferTxt.style.display = "block";
+  bufferTxt.textContent = `Buffering ${p}%`;
+}
+
+function hideBuffer() {
+  bufferTxt.style.display = "none";
+}
+
+// ================= RECONNECT =================
 function hardResetAudio() {
   audio.pause();
   audio.src = "";
   audio.load();
-  audio.src = STREAM_URL + "?t=" + Date.now(); // cache busting
+  audio.src = STREAM_URL + "?t=" + Date.now();
   audio.load();
 }
 
 function reconnect() {
+  isPlaying = false;
   lamp.classList.remove("on");
   btn.textContent = "▶";
-  isPlaying = false;
+  showBuffer(0);
 
   hardResetAudio();
 
   setTimeout(async () => {
     try {
       await audio.play();
-      lamp.classList.add("on");
-      btn.textContent = "⏸";
-      isPlaying = true;
-      retryDelay = RETRY_BASE; // reset jika sukses
     } catch {
       scheduleReconnect();
     }
@@ -235,33 +248,36 @@ function reconnect() {
 }
 
 function scheduleReconnect() {
+  showBuffer(0);
   setTimeout(reconnect, retryDelay);
   retryDelay = Math.min(retryDelay * 1.8, RETRY_MAX);
 }
 
-// ================= EVENT LISTENER =================
-audio.addEventListener("error", scheduleReconnect);
-audio.addEventListener("stalled", scheduleReconnect);
-audio.addEventListener("ended", scheduleReconnect);
-audio.addEventListener("waiting", scheduleReconnect);
+// ================= EVENT AUDIO =================
+audio.addEventListener("waiting", () => showBuffer(10));
+audio.addEventListener("stalled", () => showBuffer(20));
+audio.addEventListener("canplay", () => showBuffer(70));
+audio.addEventListener("canplaythrough", () => showBuffer(100));
 
 audio.addEventListener("playing", () => {
+  hideBuffer();
   lamp.classList.add("on");
   btn.textContent = "⏸";
   isPlaying = true;
   retryDelay = RETRY_BASE;
 });
 
+audio.addEventListener("error", scheduleReconnect);
+audio.addEventListener("ended", scheduleReconnect);
+
 // ================= FREEZE DETECTOR =================
 setInterval(() => {
   if (!isPlaying) return;
-
-  if (audio.currentTime === lastTime) {
-    scheduleReconnect();
-  }
+  if (audio.currentTime === lastTime) scheduleReconnect();
   lastTime = audio.currentTime;
 }, FREEZE_TIME);
 </script>
+
 
 
 </body>
