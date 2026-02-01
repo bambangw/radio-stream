@@ -1,178 +1,139 @@
-<!doctype html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<title>Haza Radio — Premium Wooden Player</title>
-
-<style>
-body {
-  background:#222;
-  font-family: Arial, sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  margin:0;
-}
-
-/* === Radio Premium Box === */
-.radio-box {
-  width:460px;
-  padding:30px;
-  border-radius:25px;
-  background:url('https://bambangw.github.io/radio-stream/logo2.jpg') center/cover;
-  box-shadow:0 0 25px rgba(0,0,0,.6), inset 0 0 40px rgba(0,0,0,.4);
-  border:7px solid #3b2713;
-  text-align:center;
-  color:#f9e7c9;
-}
-
-.radio-title {
-  font-size:26px;
-  font-weight:bold;
-  margin-bottom:10px;
-}
-
-.light {
-  width:20px;height:20px;
-  background:#800;
-  border-radius:50%;
-  margin:10px auto 20px;
-  box-shadow:0 0 10px #b00;
-}
-.light.on {
-  background:#3aff57;
-  box-shadow:0 0 12px #3aff57;
-}
-
-.btn-pp {
-  width:95px;height:95px;
-  background:#c49b63;
-  border-radius:50%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  cursor:pointer;
-  font-size:30px;
-  margin:20px auto;
-  box-shadow:0 0 10px rgba(0,0,0,.6), inset 0 0 12px rgba(255,255,255,.3);
-}
-
-.vu-container {
-  display:flex;
-  justify-content:center;
-  gap:4px;
-  margin-top:25px;
-}
-.led {
-  width:8px;
-  height:30px;
-  background:#330000;
-  border-radius:3px;
-}
-</style>
-</head>
-
-<body>
-
-<div class="radio-box">
-  <div class="radio-title">📻 Musik Nostalgia</div>
-  <div id="lamp" class="light"></div>
-  <div id="ppBtn" class="btn-pp">▶</div>
-
-  <div class="vu-container">
-    <div class="led"></div><div class="led"></div><div class="led"></div>
-    <div class="led"></div><div class="led"></div><div class="led"></div>
-    <div class="led"></div><div class="led"></div><div class="led"></div>
-  </div>
-
-  <!-- autoplay + muted -->
-  <audio id="radio"
-         src="https://b.alhastream.com:5044/radio"
-         preload="auto"
-         autoplay
-         playsinline
-         crossorigin="anonymous">
-  </audio>
-</div>
-
 <script>
+// ================= KONFIGURASI =================
+const STREAM_URL = "https://b.alhastream.com:5044/radio";
+
+const RETRY_BASE = 3000;      // 3 detik awal
+const RETRY_MAX  = 30000;     // max 30 detik
+const FREEZE_TIME = 15000;    // 15 detik audio diam = reconnect
+
+// ================= ELEMENT =================
 const audio = document.getElementById("radio");
-const btn   = document.getElementById("ppBtn");
 const lamp  = document.getElementById("lamp");
+const btn   = document.getElementById("ppBtn");
 const leds  = document.querySelectorAll(".led");
 
-let audioCtx, analyser, dataArray;
+audio.src = STREAM_URL;
+audio.preload = "none";
+
+// ================= STATE =================
+let audioCtx, sourceNode, analyser, dataArray;
 let isPlaying = false;
+let retryDelay = RETRY_BASE;
+let lastTime = 0;
 
-// === SETUP AUDIO CONTEXT ===
-function setupAudio(){
-  if(audioCtx) return;
-  audioCtx = new AudioContext();
-  const src = audioCtx.createMediaElementSource(audio);
-  analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 64;
-  dataArray = new Uint8Array(analyser.frequencyBinCount);
-  src.connect(analyser);
-  analyser.connect(audioCtx.destination);
-  animateVU();
-}
+// ================= PLAY / PAUSE =================
+btn.onclick = async () => {
+  if (!audioCtx) setupAudio();
 
-// === AUTOPLAY HACK (MUTED → UNMUTE) ===
-window.addEventListener("load", () => {
-  audio.play().then(()=>{
-    setupAudio();
-    lamp.classList.add("on");
-    btn.textContent = "⏸";
-    isPlaying = true;
-
-    // buka suara setelah aman
-    setTimeout(()=> audio.muted = false, 500);
-  }).catch(()=>{
-    // fallback: klik di mana saja
-    document.body.addEventListener("click", unlockOnce, {once:true});
-  });
-});
-
-function unlockOnce(){
-  audio.muted = false;
-  audio.play();
-  setupAudio();
-  lamp.classList.add("on");
-  btn.textContent = "⏸";
-  isPlaying = true;
-}
-
-// === PLAY / PAUSE ===
-btn.onclick = ()=>{
-  setupAudio();
-  if(!isPlaying){
-    audio.muted = false;
-    audio.play();
-    lamp.classList.add("on");
-    btn.textContent="⏸";
-    isPlaying=true;
-  }else{
+  if (!isPlaying) {
+    try {
+      await audio.play();
+      lamp.classList.add("on");
+      btn.textContent = "⏸";
+      isPlaying = true;
+    } catch (e) {
+      scheduleReconnect();
+    }
+  } else {
     audio.pause();
     lamp.classList.remove("on");
-    btn.textContent="▶";
-    isPlaying=false;
+    btn.textContent = "▶";
+    isPlaying = false;
   }
 };
 
-// === VU METER ===
-function animateVU(){
+// ================= AUDIO CONTEXT =================
+function setupAudio() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+    latencyHint: "playback"
+  });
+
+  sourceNode = audioCtx.createMediaElementSource(audio);
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 64;
+
+  dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+  sourceNode.connect(analyser);
+  analyser.connect(audioCtx.destination);
+
+  animateVU();
+}
+
+// ================= VU METER =================
+function animateVU() {
   requestAnimationFrame(animateVU);
-  if(!analyser) return;
+  if (!analyser || !isPlaying) return;
+
   analyser.getByteFrequencyData(dataArray);
-  leds.forEach((led,i)=>{
-    const v=dataArray[i]||0;
-    led.style.height=(10+(v/255)*30)+"px";
-    led.style.background = v>180?"#3aff57":v>100?"#ff4444":"#224400";
+
+  leds.forEach((led, i) => {
+    let v = dataArray[i] || 0;
+    let h = 10 + (v / 255) * 30;
+    led.style.height = h + "px";
+
+    led.style.background =
+      v > 180 ? "#33ff33" :
+      v > 120 ? "#ff0000" :
+      v > 60  ? "#0000ff" :
+                "#225500";
   });
 }
+
+// ================= RECONNECT CORE =================
+function hardResetAudio() {
+  audio.pause();
+  audio.src = "";
+  audio.load();
+  audio.src = STREAM_URL + "?t=" + Date.now(); // cache busting
+  audio.load();
+}
+
+function reconnect() {
+  lamp.classList.remove("on");
+  btn.textContent = "▶";
+  isPlaying = false;
+
+  hardResetAudio();
+
+  setTimeout(async () => {
+    try {
+      await audio.play();
+      lamp.classList.add("on");
+      btn.textContent = "⏸";
+      isPlaying = true;
+      retryDelay = RETRY_BASE; // reset jika sukses
+    } catch {
+      scheduleReconnect();
+    }
+  }, 500);
+}
+
+function scheduleReconnect() {
+  setTimeout(reconnect, retryDelay);
+  retryDelay = Math.min(retryDelay * 1.8, RETRY_MAX);
+}
+
+// ================= EVENT LISTENER =================
+audio.addEventListener("error", scheduleReconnect);
+audio.addEventListener("stalled", scheduleReconnect);
+audio.addEventListener("ended", scheduleReconnect);
+audio.addEventListener("waiting", scheduleReconnect);
+
+audio.addEventListener("playing", () => {
+  lamp.classList.add("on");
+  btn.textContent = "⏸";
+  isPlaying = true;
+  retryDelay = RETRY_BASE;
+});
+
+// ================= FREEZE DETECTOR =================
+setInterval(() => {
+  if (!isPlaying) return;
+
+  if (audio.currentTime === lastTime) {
+    scheduleReconnect();
+  }
+  lastTime = audio.currentTime;
+}, FREEZE_TIME);
 </script>
-
-</body>
-</html>
-
