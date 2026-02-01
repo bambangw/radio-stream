@@ -104,7 +104,27 @@ body {
 
   <div id="lamp" class="light"></div>
 
+  <div style="display:flex;align-items:center;justify-content:center;gap:15px;">
+
   <div id="ppBtn" class="btn-pp">▶</div>
+
+  <div id="streamInfo" style="
+    width:180px;
+    text-align:left;
+    font-size:13px;
+    color:#ffe9b3;
+    text-shadow:0 0 5px #000;
+    line-height:1.4;
+  ">
+    <div id="radioStatus">⏳ Connecting…</div>
+    <div id="songTitle" style="font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+      —
+    </div>
+  </div>
+
+</div>
+
+
 <div id="bufferStatus" style="
   margin-top:10px;
   font-size:14px;
@@ -340,8 +360,72 @@ audio.addEventListener("waiting", hideBitrate);
 audio.addEventListener("stalled", hideBitrate);
 audio.addEventListener("error", hideBitrate);
 audio.addEventListener("ended", hideBitrate);
-
 </script>
+
+
+<script>
+// ================= STREAM INFO =================
+
+// GANTI jika mount point berbeda
+const ICECAST_STATUS_URL =
+  "https://b.alhastream.com:5044/status-json.xsl";
+
+const radioStatus = document.getElementById("radioStatus");
+const songTitle   = document.getElementById("songTitle");
+
+// ================= STATUS HANDLER =================
+function setStatus(txt) {
+  radioStatus.textContent = txt;
+}
+
+// ================= FETCH METADATA =================
+async function fetchMetadata() {
+  try {
+    const res = await fetch(ICECAST_STATUS_URL, { cache: "no-store" });
+    const data = await res.json();
+
+    let source = data.icestats.source;
+    if (Array.isArray(source)) {
+      source = source[0]; // ambil mount pertama
+    }
+
+    if (source) {
+      songTitle.textContent =
+        source.title || source.song || "Unknown Title";
+    }
+  } catch {
+    songTitle.textContent = "—";
+  }
+}
+
+// ================= UPDATE LOOP =================
+setInterval(fetchMetadata, 8000);
+
+// ================= AUDIO STATUS SYNC =================
+audio.addEventListener("playing", () => {
+  setStatus("🔴 LIVE");
+  fetchMetadata();
+});
+
+audio.addEventListener("waiting", () => {
+  setStatus("⏳ Buffering…");
+});
+
+audio.addEventListener("stalled", () => {
+  setStatus("🔄 Reconnecting…");
+});
+
+audio.addEventListener("error", () => {
+  setStatus("❌ Error");
+});
+
+audio.addEventListener("pause", () => {
+  setStatus("⏸ Paused");
+});
+</script>
+
+
+
 
 
 
