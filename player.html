@@ -1,3 +1,128 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Haza Radio — Premium Wooden Player</title>
+
+<style>
+body {
+  background:#222;
+  font-family: Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
+
+/* === Radio Premium Box === */
+.radio-box {
+  width: 460px;
+  padding: 30px;
+  border-radius: 25px;
+  background: url('https://bambangw.github.io/radio-stream/logo2.jpg');
+  background-size: cover;
+  background-position:center;
+  box-shadow:
+    0 0 25px rgba(0,0,0,.6),
+    inset 0 0 40px rgba(0,0,0,.4);
+  border: 7px solid #3b2713;
+  text-align:center;
+  color:#f9e7c9;
+}
+
+/* === Judul === */
+.radio-title {
+  font-size:26px;
+  font-weight:bold;
+  margin-bottom:10px;
+  text-shadow:0 0 5px rgba(0,0,0,.7);
+}
+
+/* === Lampu indikator === */
+.light {
+  width:20px;
+  height:20px;
+  background:#800;
+  border-radius:50%;
+  margin:10px auto 20px;
+  box-shadow:0 0 10px #b00;
+}
+
+.light.on {
+  background:#3aff57;
+  box-shadow:0 0 12px #3aff57;
+}
+
+/* === Tombol Play/Pause === */
+.btn-pp {
+  width:95px;
+  height:95px;
+  background:#c49b63;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  font-size:30px;
+  box-shadow:
+    0 0 10px rgba(0,0,0,.6),
+    inset 0 0 12px rgba(255,255,255,.3);
+  margin:20px auto;
+  color:white;
+  transition:.2s;
+}
+
+.btn-pp:hover {
+  transform:scale(1.08);
+}
+
+/* === VU METER LED === */
+.vu-container {
+  display:flex;
+  justify-content:center;
+  gap:4px;
+  margin-top:25px;
+}
+
+.led {
+  width:8px;
+  height:30px;
+  background:#330000;
+  border-radius:3px;
+  transition:height .1s ease, background .1s ease;
+  box-shadow:0 0 3px #000;
+}
+</style>
+</head>
+
+<body>
+
+<div class="radio-box">
+
+  <div class="radio-title">📻 Musik Nostalgia</div>
+
+  <div id="lamp" class="light"></div>
+
+  <div id="ppBtn" class="btn-pp">▶</div>
+
+  <!-- VU METER -->
+  <div class="vu-container">
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+  </div>
+
+  <audio id="radio" preload="auto" crossorigin="anonymous"></audio>
+
+</div>
+
 <script>
 // ================= KONFIGURASI =================
 const STREAM_URL = "https://b.alhastream.com:5044/radio";
@@ -137,3 +262,7 @@ setInterval(() => {
   lastTime = audio.currentTime;
 }, FREEZE_TIME);
 </script>
+
+
+</body>
+</html>
