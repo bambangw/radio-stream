@@ -116,7 +116,7 @@ body {
     text-shadow:0 0 5px #000;
     line-height:1.4;
   ">
-    <div id="radioStatus">⏳ Klik PLAY</div>
+    <div id="radioStatus">⏳ Monggo Pinarak</div>
     <div id="songTitle" style="font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
       —
     </div>
@@ -391,7 +391,7 @@ async function fetchMetadata() {
 
     if (source) {
       songTitle.textContent =
-        source.title || source.song || "Unknown Title";
+        source.title || source.song || "Audio Stereo";
     }
   } catch {
     songTitle.textContent = "—";
@@ -408,7 +408,7 @@ audio.addEventListener("playing", () => {
 });
 
 audio.addEventListener("waiting", () => {
-  setStatus("⏳ Buffering…");
+  setStatus("⏳ Sabar Lurr");
 });
 
 audio.addEventListener("stalled", () => {
@@ -416,11 +416,11 @@ audio.addEventListener("stalled", () => {
 });
 
 audio.addEventListener("error", () => {
-  setStatus("❌ Error");
+  setStatus("❌ Menunggu Jaringan");
 });
 
 audio.addEventListener("pause", () => {
-  setStatus("⏸ Paused");
+  setStatus("⏸ Ngopi rumiyin");
 });
 </script>
 
@@ -431,7 +431,6 @@ audio.addEventListener("pause", () => {
 
 </body>
 </html>
-
 
 
 
