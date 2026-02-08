@@ -291,7 +291,7 @@ audio.addEventListener("canplaythrough", () => showBuffer(100));
 audio.addEventListener("playing", () => {
   hideBuffer();
   lamp.classList.add("on");
-  btn.textContent = "⏸";
+  btn.textContent = "🧭";
   isPlaying = true;
   retryDelay = RETRY_BASE;
 });
@@ -431,6 +431,7 @@ audio.addEventListener("pause", () => {
 
 </body>
 </html>
+
 
 
 
