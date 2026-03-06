@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<title>Haza Radio — Premium Wooden Player</title>
+<title>Haza Radio — Kulon Progo</title>
 
 <style>
 body {
@@ -20,7 +20,7 @@ body {
   width: 460px;
   padding: 30px;
   border-radius: 25px;
-  background: url('https://bambangw.github.io/radio-stream/88991.jpg');
+  background: url('https://bambangw.github.io/radio-stream/889.jpg');
   background-size: cover;
   background-position:center;
   box-shadow:
@@ -165,9 +165,12 @@ body {
 // ================= KONFIGURASI =================
 const STREAM_URL = "https://b.alhastream.com:5044/radio";
 
-const RETRY_BASE = 3000;
-const RETRY_MAX  = 30000;
-const FREEZE_TIME = 15000;
+const RETRY_BASE = 4000;
+const RETRY_MAX  = 45000;
+
+const FREEZE_CHECK = 20000;
+const NETWORK_TIMEOUT = 15000;
+
 
 // ================= ELEMENT =================
 const audio = document.getElementById("radio");
@@ -176,41 +179,67 @@ const btn   = document.getElementById("ppBtn");
 const leds  = document.querySelectorAll(".led");
 const bufferTxt = document.getElementById("bufferStatus");
 
-audio.src = STREAM_URL;
 audio.preload = "none";
+audio.crossOrigin = "anonymous";
+
 
 // ================= STATE =================
-let audioCtx, sourceNode, analyser, dataArray;
+let audioCtx;
+let analyser;
+let sourceNode;
+let dataArray;
+
 let isPlaying = false;
 let retryDelay = RETRY_BASE;
+
 let lastTime = 0;
+let networkTimer = null;
+
+
+// ================= SET STREAM =================
+function setStream() {
+  audio.src = STREAM_URL + "?nocache=" + Date.now();
+  audio.load();
+}
+
+setStream();
+
 
 // ================= PLAY / PAUSE =================
 btn.onclick = async () => {
+
   if (!audioCtx) setupAudio();
 
   if (!isPlaying) {
+
     showBuffer(0);
+
     try {
       await audio.play();
     } catch {
       scheduleReconnect();
     }
+
   } else {
+
     audio.pause();
     lamp.classList.remove("on");
     btn.textContent = "▶";
     isPlaying = false;
+
   }
 };
 
+
 // ================= AUDIO CONTEXT =================
 function setupAudio() {
+
   audioCtx = new (window.AudioContext || window.webkitAudioContext)({
-    latencyHint:"playback"
+    latencyHint: "playback"
   });
 
   sourceNode = audioCtx.createMediaElementSource(audio);
+
   analyser = audioCtx.createAnalyser();
   analyser.fftSize = 64;
 
@@ -222,89 +251,195 @@ function setupAudio() {
   animateVU();
 }
 
+
 // ================= VU METER =================
 function animateVU() {
+
   requestAnimationFrame(animateVU);
+
   if (!analyser || !isPlaying) return;
 
   analyser.getByteFrequencyData(dataArray);
+
   leds.forEach((led, i) => {
+
     let v = dataArray[i] || 0;
+
     let h = 10 + (v / 255) * 30;
+
     led.style.height = h + "px";
+
     led.style.background =
-      v > 180 ? "#33ff33" :
-      v > 120 ? "#ff0000" :
-      v > 60  ? "#0000ff" :
+      v > 200 ? "#33ff33" :
+      v > 140 ? "#ff0000" :
+      v > 80  ? "#0000ff" :
                 "#225500";
+
   });
+
 }
+
 
 // ================= BUFFER DISPLAY =================
 function showBuffer(p) {
+
   bufferTxt.style.display = "block";
   bufferTxt.textContent = `Buffering ${p}%`;
+
 }
 
 function hideBuffer() {
+
   bufferTxt.style.display = "none";
+
 }
+
+
+// ================= HARD RESET =================
+function hardResetAudio() {
+
+  try {
+
+    audio.pause();
+
+    audio.removeAttribute("src");
+    audio.load();
+
+    setStream();
+
+  } catch {}
+
+}
+
 
 // ================= RECONNECT =================
-function hardResetAudio() {
-  audio.pause();
-  audio.src = "";
-  audio.load();
-  audio.src = STREAM_URL + "?t=" + Date.now();
-  audio.load();
-}
+async function reconnect() {
 
-function reconnect() {
   isPlaying = false;
+
   lamp.classList.remove("on");
   btn.textContent = "▶";
+
   showBuffer(0);
 
   hardResetAudio();
 
-  setTimeout(async () => {
-    try {
-      await audio.play();
-    } catch {
-      scheduleReconnect();
-    }
-  }, 500);
+  await new Promise(r => setTimeout(r, 1500));
+
+  try {
+
+    await audio.play();
+
+  } catch {
+
+    scheduleReconnect();
+
+  }
+
 }
 
+
+// ================= RETRY SYSTEM =================
 function scheduleReconnect() {
+
   showBuffer(0);
+
   setTimeout(reconnect, retryDelay);
-  retryDelay = Math.min(retryDelay * 1.8, RETRY_MAX);
+
+  retryDelay = Math.min(retryDelay * 1.6, RETRY_MAX);
+
 }
 
-// ================= EVENT AUDIO =================
-audio.addEventListener("waiting", () => showBuffer(10));
-audio.addEventListener("stalled", () => showBuffer(20));
-audio.addEventListener("canplay", () => showBuffer(70));
-audio.addEventListener("canplaythrough", () => showBuffer(100));
+
+// ================= NETWORK WATCHDOG =================
+function resetNetworkTimer() {
+
+  clearTimeout(networkTimer);
+
+  networkTimer = setTimeout(() => {
+
+    if (isPlaying) {
+
+      reconnect();
+
+    }
+
+  }, NETWORK_TIMEOUT);
+
+}
+
+
+// ================= AUDIO EVENTS =================
+audio.addEventListener("waiting", () => {
+
+  showBuffer(20);
+  resetNetworkTimer();
+
+});
+
+audio.addEventListener("stalled", () => {
+
+  showBuffer(30);
+  resetNetworkTimer();
+
+});
+
+audio.addEventListener("canplay", () => {
+
+  showBuffer(70);
+
+});
+
+audio.addEventListener("canplaythrough", () => {
+
+  showBuffer(100);
+
+});
 
 audio.addEventListener("playing", () => {
+
   hideBuffer();
+
   lamp.classList.add("on");
+
   btn.textContent = "🧭";
+
   isPlaying = true;
+
   retryDelay = RETRY_BASE;
+
+  resetNetworkTimer();
+
+});
+
+
+audio.addEventListener("pause", () => {
+
+  isPlaying = false;
+
 });
 
 audio.addEventListener("error", scheduleReconnect);
 audio.addEventListener("ended", scheduleReconnect);
 
+
+
 // ================= FREEZE DETECTOR =================
 setInterval(() => {
+
   if (!isPlaying) return;
-  if (audio.currentTime === lastTime) scheduleReconnect();
+
+  if (audio.currentTime === lastTime) {
+
+    reconnect();
+
+  }
+
   lastTime = audio.currentTime;
-}, FREEZE_TIME);
+
+}, FREEZE_CHECK);
+
+
 
 // ================= BITRATE ESTIMATOR =================
 const bitrateTxt = document.getElementById("bitrateStatus");
@@ -408,11 +543,11 @@ audio.addEventListener("playing", () => {
 });
 
 audio.addEventListener("waiting", () => {
-  setStatus("⏳ Sabar Lurr");
+  setStatus("⏳ Selamat Datang");
 });
 
 audio.addEventListener("stalled", () => {
-  setStatus("🔄 Reconnecting…");
+  setStatus("🔄 Menghubungkan");
 });
 
 audio.addEventListener("error", () => {
@@ -420,7 +555,7 @@ audio.addEventListener("error", () => {
 });
 
 audio.addEventListener("pause", () => {
-  setStatus("⏸ Ngopi rumiyin");
+  setStatus("⏸ Memulihkan");
 });
 </script>
 
@@ -431,11 +566,3 @@ audio.addEventListener("pause", () => {
 
 </body>
 </html>
-
-
-
-
-
-
-
-
