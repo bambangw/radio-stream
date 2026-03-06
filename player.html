@@ -578,6 +578,33 @@ songTitle.textContent="—";
 
 setInterval(fetchMetadata,METADATA_INTERVAL);
 
+
+
+// ================= UPDATE LOOP =================
+setInterval(fetchMetadata, 8000);
+
+// ================= AUDIO STATUS SYNC =================
+audio.addEventListener("playing", () => {
+  setStatus("🔴 LIVE");
+  fetchMetadata();
+});
+
+audio.addEventListener("waiting", () => {
+  setStatus("⏳ Selamat Datang");
+});
+
+audio.addEventListener("stalled", () => {
+  setStatus("🔄 Menghubungkan");
+});
+
+audio.addEventListener("error", () => {
+  setStatus("❌ Menunggu Jaringan");
+});
+
+audio.addEventListener("pause", () => {
+  setStatus("⏸ Memulihkan");
+});
+  
 </script>
 
 
@@ -587,6 +614,7 @@ setInterval(fetchMetadata,METADATA_INTERVAL);
 
 </body>
 </html>
+
 
 
 
