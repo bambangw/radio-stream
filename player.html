@@ -162,379 +162,424 @@ body {
 </div>
 
 <script>
+<script>
+
 // ================= KONFIGURASI =================
+
 const STREAM_URL = "https://b.alhastream.com:5044/radio";
+const ICECAST_STATUS_URL = "https://b.alhastream.com:5044/status-json.xsl";
 
 const RETRY_BASE = 4000;
-const RETRY_MAX  = 45000;
+const RETRY_MAX = 60000;
 
 const FREEZE_CHECK = 20000;
 const NETWORK_TIMEOUT = 15000;
 
+const METADATA_INTERVAL = 10000;
+
 
 // ================= ELEMENT =================
-const audio = document.getElementById("radio");
-const lamp  = document.getElementById("lamp");
-const btn   = document.getElementById("ppBtn");
-const leds  = document.querySelectorAll(".led");
-const bufferTxt = document.getElementById("bufferStatus");
 
-audio.preload = "none";
-audio.crossOrigin = "anonymous";
+const audio = document.getElementById("radio");
+const lamp = document.getElementById("lamp");
+const btn = document.getElementById("ppBtn");
+
+const leds = document.querySelectorAll(".led");
+
+const bufferTxt = document.getElementById("bufferStatus");
+const bitrateTxt = document.getElementById("bitrateStatus");
+
+const radioStatus = document.getElementById("radioStatus");
+const songTitle = document.getElementById("songTitle");
 
 
 // ================= STATE =================
+
 let audioCtx;
 let analyser;
 let sourceNode;
 let dataArray;
 
-let isPlaying = false;
 let retryDelay = RETRY_BASE;
 
+let isPlaying = false;
+
 let lastTime = 0;
-let networkTimer = null;
+
+let networkTimer;
 
 
-// ================= SET STREAM =================
-function setStream() {
-  audio.src = STREAM_URL + "?nocache=" + Date.now();
-  audio.load();
+// ================= STREAM SETUP =================
+
+function setStream(){
+
+audio.src = STREAM_URL + "?t=" + Date.now();
+audio.load();
+
 }
+
+audio.preload = "none";
+audio.crossOrigin = "anonymous";
 
 setStream();
 
 
+// ================= AUDIO CONTEXT =================
+
+function initAudio(){
+
+if(audioCtx) return;
+
+audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+latencyHint:"playback"
+});
+
+sourceNode = audioCtx.createMediaElementSource(audio);
+
+analyser = audioCtx.createAnalyser();
+analyser.fftSize = 64;
+
+dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+sourceNode.connect(analyser);
+analyser.connect(audioCtx.destination);
+
+animateVU();
+
+}
+
+
 // ================= PLAY / PAUSE =================
-btn.onclick = async () => {
 
-  if (!audioCtx) setupAudio();
+btn.onclick = async ()=>{
 
-  if (!isPlaying) {
+initAudio();
 
-    showBuffer(0);
+if(audioCtx.state === "suspended"){
 
-    try {
-      await audio.play();
-    } catch {
-      scheduleReconnect();
-    }
+await audioCtx.resume();
 
-  } else {
+}
 
-    audio.pause();
-    lamp.classList.remove("on");
-    btn.textContent = "▶";
-    isPlaying = false;
+if(!isPlaying){
 
-  }
+showBuffer(0);
+
+try{
+
+await audio.play();
+
+}catch{
+
+scheduleReconnect();
+
+}
+
+}else{
+
+audio.pause();
+isPlaying=false;
+
+lamp.classList.remove("on");
+
+btn.textContent="▶";
+
+}
+
 };
 
 
-// ================= AUDIO CONTEXT =================
-function setupAudio() {
+// ================= BUFFER =================
 
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)({
-    latencyHint: "playback"
-  });
+function showBuffer(p){
 
-  sourceNode = audioCtx.createMediaElementSource(audio);
+bufferTxt.style.display="block";
+bufferTxt.textContent="Buffering "+p+"%";
 
-  analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 64;
+}
 
-  dataArray = new Uint8Array(analyser.frequencyBinCount);
+function hideBuffer(){
 
-  sourceNode.connect(analyser);
-  analyser.connect(audioCtx.destination);
+bufferTxt.style.display="none";
 
-  animateVU();
 }
 
 
 // ================= VU METER =================
-function animateVU() {
 
-  requestAnimationFrame(animateVU);
+function animateVU(){
 
-  if (!analyser || !isPlaying) return;
+requestAnimationFrame(animateVU);
 
-  analyser.getByteFrequencyData(dataArray);
+if(!analyser || !isPlaying) return;
 
-  leds.forEach((led, i) => {
+analyser.getByteFrequencyData(dataArray);
 
-    let v = dataArray[i] || 0;
+leds.forEach((led,i)=>{
 
-    let h = 10 + (v / 255) * 30;
+let v=dataArray[i]||0;
 
-    led.style.height = h + "px";
+let h=10+(v/255)*30;
 
-    led.style.background =
-      v > 200 ? "#33ff33" :
-      v > 140 ? "#ff0000" :
-      v > 80  ? "#0000ff" :
-                "#225500";
+led.style.height=h+"px";
 
-  });
+led.style.background=
+v>200?"#33ff33":
+v>140?"#ff0000":
+v>80?"#0000ff":
+"#225500";
 
-}
-
-
-// ================= BUFFER DISPLAY =================
-function showBuffer(p) {
-
-  bufferTxt.style.display = "block";
-  bufferTxt.textContent = `Buffering ${p}%`;
-
-}
-
-function hideBuffer() {
-
-  bufferTxt.style.display = "none";
+});
 
 }
 
 
 // ================= HARD RESET =================
-function hardResetAudio() {
 
-  try {
+function resetAudio(){
 
-    audio.pause();
+audio.pause();
 
-    audio.removeAttribute("src");
-    audio.load();
+audio.removeAttribute("src");
 
-    setStream();
+audio.load();
 
-  } catch {}
+setTimeout(()=>{
+
+setStream();
+
+},500);
 
 }
 
 
 // ================= RECONNECT =================
-async function reconnect() {
 
-  isPlaying = false;
+async function reconnect(){
 
-  lamp.classList.remove("on");
-  btn.textContent = "▶";
+isPlaying=false;
 
-  showBuffer(0);
+lamp.classList.remove("on");
 
-  hardResetAudio();
+btn.textContent="▶";
 
-  await new Promise(r => setTimeout(r, 1500));
+showBuffer(0);
 
-  try {
+resetAudio();
 
-    await audio.play();
+await new Promise(r=>setTimeout(r,2000));
 
-  } catch {
+try{
 
-    scheduleReconnect();
+await audio.play();
 
-  }
+}catch{
+
+scheduleReconnect();
+
+}
 
 }
 
 
 // ================= RETRY SYSTEM =================
-function scheduleReconnect() {
 
-  showBuffer(0);
+function scheduleReconnect(){
 
-  setTimeout(reconnect, retryDelay);
+setTimeout(reconnect,retryDelay);
 
-  retryDelay = Math.min(retryDelay * 1.6, RETRY_MAX);
+retryDelay=Math.min(retryDelay*1.7,RETRY_MAX);
 
 }
 
 
 // ================= NETWORK WATCHDOG =================
-function resetNetworkTimer() {
 
-  clearTimeout(networkTimer);
+function resetNetworkTimer(){
 
-  networkTimer = setTimeout(() => {
+clearTimeout(networkTimer);
 
-    if (isPlaying) {
+networkTimer=setTimeout(()=>{
 
-      reconnect();
+if(isPlaying){
 
-    }
+reconnect();
 
-  }, NETWORK_TIMEOUT);
+}
+
+},NETWORK_TIMEOUT);
 
 }
 
 
 // ================= AUDIO EVENTS =================
-audio.addEventListener("waiting", () => {
 
-  showBuffer(20);
-  resetNetworkTimer();
+audio.addEventListener("waiting",()=>{
 
-});
+showBuffer(20);
 
-audio.addEventListener("stalled", () => {
+setStatus("⏳ Buffering");
 
-  showBuffer(30);
-  resetNetworkTimer();
+resetNetworkTimer();
 
 });
 
-audio.addEventListener("canplay", () => {
+audio.addEventListener("stalled",()=>{
 
-  showBuffer(70);
+showBuffer(30);
 
-});
+setStatus("🔄 Reconnecting");
 
-audio.addEventListener("canplaythrough", () => {
-
-  showBuffer(100);
+resetNetworkTimer();
 
 });
 
-audio.addEventListener("playing", () => {
+audio.addEventListener("canplay",()=>{
 
-  hideBuffer();
-
-  lamp.classList.add("on");
-
-  btn.textContent = "🧭";
-
-  isPlaying = true;
-
-  retryDelay = RETRY_BASE;
-
-  resetNetworkTimer();
+showBuffer(70);
 
 });
 
+audio.addEventListener("playing",()=>{
 
-audio.addEventListener("pause", () => {
+hideBuffer();
 
-  isPlaying = false;
+lamp.classList.add("on");
+
+btn.textContent="🧭";
+
+retryDelay=RETRY_BASE;
+
+isPlaying=true;
+
+setStatus("🔴 LIVE");
+
+resetNetworkTimer();
 
 });
 
-audio.addEventListener("error", scheduleReconnect);
-audio.addEventListener("ended", scheduleReconnect);
+audio.addEventListener("pause",()=>{
 
+setStatus("⏸ Paused");
+
+});
+
+audio.addEventListener("error",scheduleReconnect);
+audio.addEventListener("ended",scheduleReconnect);
 
 
 // ================= FREEZE DETECTOR =================
-setInterval(() => {
 
-  if (!isPlaying) return;
+setInterval(()=>{
 
-  if (audio.currentTime === lastTime) {
+if(!isPlaying) return;
 
-    reconnect();
+if(audio.currentTime===lastTime){
 
-  }
+reconnect();
 
-  lastTime = audio.currentTime;
-
-}, FREEZE_CHECK);
-
-
-
-// ================= BITRATE ESTIMATOR =================
-const bitrateTxt = document.getElementById("bitrateStatus");
-
-let lastBytes = 0;
-let lastBitrateTime = Date.now();
-
-function showBitrate(kbps) {
-  bitrateTxt.style.display = "block";
-  bitrateTxt.textContent = `Bitrate: ${kbps} kbps`;
 }
 
-function hideBitrate() {
-  bitrateTxt.style.display = "none";
+lastTime=audio.currentTime;
+
+},FREEZE_CHECK);
+
+
+// ================= BITRATE ESTIMATION =================
+
+let lastBytes=0;
+let lastBitrateTime=Date.now();
+
+function showBitrate(kbps){
+
+bitrateTxt.style.display="block";
+bitrateTxt.textContent="Bitrate: "+kbps+" kbps";
+
 }
 
-// Estimasi bitrate dari buffered data
-setInterval(() => {
-  if (!audio || audio.readyState < 2 || audio.paused) return;
+function hideBitrate(){
 
-  try {
-    if (audio.buffered.length) {
-      const bufferedEnd = audio.buffered.end(0);
-      const now = Date.now();
-      const deltaTime = (now - lastBitrateTime) / 1000;
+bitrateTxt.style.display="none";
 
-      if (deltaTime > 0) {
-        // asumsi audio 16-bit stereo
-        const estimatedBytes =
-          bufferedEnd * 44100 * 2 * 2;
+}
 
-        const deltaBytes = estimatedBytes - lastBytes;
-        const kbps = Math.max(
-          32,
-          Math.round((deltaBytes * 8) / 1000 / deltaTime)
-        );
+setInterval(()=>{
 
-        showBitrate(kbps);
+if(audio.readyState<2 || audio.paused) return;
 
-        lastBytes = estimatedBytes;
-        lastBitrateTime = now;
-      }
-    }
-  } catch {}
-}, 2000);
+try{
 
-// ================= EVENT HANDLING =================
-audio.addEventListener("playing", () => {
-  bitrateTxt.style.display = "block";
-});
+if(audio.buffered.length){
 
-audio.addEventListener("waiting", hideBitrate);
-audio.addEventListener("stalled", hideBitrate);
-audio.addEventListener("error", hideBitrate);
-audio.addEventListener("ended", hideBitrate);
+const bufferedEnd=audio.buffered.end(0);
+
+const now=Date.now();
+
+const deltaTime=(now-lastBitrateTime)/1000;
+
+if(deltaTime>0){
+
+const estimatedBytes=bufferedEnd*44100*2*2;
+
+const deltaBytes=estimatedBytes-lastBytes;
+
+const kbps=Math.max(32,Math.round((deltaBytes*8)/1000/deltaTime));
+
+showBitrate(kbps);
+
+lastBytes=estimatedBytes;
+
+lastBitrateTime=now;
+
+}
+
+}
+
+}catch{}
+
+},3000);
+
+
+// ================= STATUS TEXT =================
+
+function setStatus(txt){
+
+radioStatus.textContent=txt;
+
+}
+
+
+// ================= METADATA =================
+
+async function fetchMetadata(){
+
+try{
+
+const res=await fetch(ICECAST_STATUS_URL,{cache:"no-store"});
+
+const data=await res.json();
+
+let source=data.icestats.source;
+
+if(Array.isArray(source)) source=source[0];
+
+if(source){
+
+songTitle.textContent=source.title||source.song||"Audio Stereo";
+
+}
+
+}catch{
+
+songTitle.textContent="—";
+
+}
+
+}
+
+setInterval(fetchMetadata,METADATA_INTERVAL);
+
 </script>
-
-
-<script>
-// ================= STREAM INFO =================
-
-// GANTI jika mount point berbeda
-const ICECAST_STATUS_URL =
-  "https://b.alhastream.com:5044/status-json.xsl";
-
-const radioStatus = document.getElementById("radioStatus");
-const songTitle   = document.getElementById("songTitle");
-
-// ================= STATUS HANDLER =================
-function setStatus(txt) {
-  radioStatus.textContent = txt;
-}
-
-// ================= FETCH METADATA =================
-async function fetchMetadata() {
-  try {
-    const res = await fetch(ICECAST_STATUS_URL, { cache: "no-store" });
-    const data = await res.json();
-
-    let source = data.icestats.source;
-    if (Array.isArray(source)) {
-      source = source[0]; // ambil mount pertama
-    }
-
-    if (source) {
-      songTitle.textContent =
-        source.title || source.song || "Audio Stereo";
-    }
-  } catch {
-    songTitle.textContent = "—";
-  }
-}
-
-// ================= UPDATE LOOP =================
-setInterval(fetchMetadata, 8000);
 
 // ================= AUDIO STATUS SYNC =================
 audio.addEventListener("playing", () => {
