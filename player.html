@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Haza Radio Streaming</title>
+<title>Haza Radio V6</title>
 
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#222">
@@ -14,16 +14,13 @@
 
 body{
 background:#222;
-font-family:Arial, sans-serif;
+font-family:Arial;
 margin:0;
 display:flex;
 justify-content:center;
-align-items:flex-start;
 padding-top:25px;
 color:#ffe9b3;
 }
-
-/* RADIO BOX */
 
 .radio-box{
 
@@ -34,7 +31,6 @@ border-radius:25px;
 
 background:url('https://bambangw.github.io/radio-stream/889.jpg');
 background-size:cover;
-background-position:center;
 
 box-shadow:
 0 0 25px rgba(0,0,0,.7),
@@ -46,19 +42,11 @@ text-align:center;
 
 }
 
-/* TITLE */
-
 .radio-title{
-
 font-size:24px;
 font-weight:bold;
 margin-bottom:10px;
-
-text-shadow:0 0 6px #000;
-
 }
-
-/* INDICATOR */
 
 .light{
 
@@ -71,19 +59,14 @@ border-radius:50%;
 
 margin:10px auto;
 
-box-shadow:0 0 8px #b00;
-
 }
 
 .light.on{
 
 background:#3aff57;
-
 box-shadow:0 0 12px #3aff57;
 
 }
-
-/* PLAY BUTTON */
 
 .btn{
 
@@ -103,42 +86,12 @@ cursor:pointer;
 
 margin:15px auto;
 
-box-shadow:
-0 0 10px rgba(0,0,0,.6),
-inset 0 0 12px rgba(255,255,255,.3);
-
 }
-
-/* STATUS */
 
 .status{
 
 margin-top:10px;
 font-size:14px;
-
-}
-
-/* VU */
-
-.vu{
-
-display:flex;
-justify-content:center;
-gap:4px;
-margin-top:20px;
-
-}
-
-.led{
-
-width:7px;
-height:22px;
-
-background:#330000;
-
-border-radius:3px;
-
-transition:.1s;
 
 }
 
@@ -149,35 +102,18 @@ transition:.1s;
 
 <div class="radio-box">
 
-<div class="radio-title">📻 Musik Nostalgia</div>
+<div class="radio-title">📻 Haza Radio</div>
 
 <div id="lamp" class="light"></div>
 
 <div id="playBtn" class="btn">▶</div>
 
-<div class="status" id="radioStatus">
-Selamat Datang
+<div id="radioStatus" class="status">
+Siap Memutar
 </div>
 
-<div class="status" id="songTitle">
+<div id="songTitle" class="status">
 —
-</div>
-
-<div class="status" id="bufferStatus" style="display:none">
-Menghubungkan
-</div>
-
-<div class="vu">
-
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-
 </div>
 
 <audio
@@ -193,10 +129,18 @@ crossorigin="anonymous">
 
 <script>
 
-/* ================= STREAM ================= */
+/* ================= MULTI SERVER ================= */
 
-const STREAM_URL =
-"https://b.alhastream.com:5044/radio";
+const STREAMS = [
+
+"https://b.alhastream.com:5044/radio",
+"https://b.alhastream.com:5044/radio",
+"https://b.alhastream.com:5044/radio"
+
+];
+
+
+/* ================= METADATA ================= */
 
 const META_URL =
 "https://b.alhastream.com:5044/status-json.xsl";
@@ -210,93 +154,58 @@ const lamp=document.getElementById("lamp");
 
 const statusTxt=document.getElementById("radioStatus");
 const songTxt=document.getElementById("songTitle");
-const bufferTxt=document.getElementById("bufferStatus");
-
-const leds=document.querySelectorAll(".led");
 
 
 /* ================= STATE ================= */
 
 let playing=false;
+
+let serverIndex=0;
+
 let retryDelay=3000;
+
 let lastTime=0;
 
 
-/* ================= AUDIO ENGINE ================= */
+/* ================= STREAM SELECT ================= */
 
-let audioCtx;
-let analyser;
-let source;
-let dataArray;
+function loadStream(){
 
+const url=STREAMS[serverIndex]+"?nocache="+Date.now();
 
-function initAudio(){
-
-if(audioCtx) return;
-
-audioCtx=new(window.AudioContext||
-window.webkitAudioContext)();
-
-source=audioCtx.createMediaElementSource(audio);
-
-analyser=audioCtx.createAnalyser();
-analyser.fftSize=64;
-
-dataArray=new Uint8Array(analyser.frequencyBinCount);
-
-source.connect(analyser);
-analyser.connect(audioCtx.destination);
-
-vuLoop();
+audio.src=url;
 
 }
 
 
-/* ================= VU METER ================= */
+/* ================= SWITCH SERVER ================= */
 
-function vuLoop(){
+function nextServer(){
 
-requestAnimationFrame(vuLoop);
+serverIndex++;
 
-if(!playing) return;
+if(serverIndex>=STREAMS.length){
 
-analyser.getByteFrequencyData(dataArray);
+serverIndex=0;
 
-leds.forEach((led,i)=>{
+}
 
-let v=dataArray[i]||0;
+statusTxt.textContent="Switch Server...";
 
-let h=10+(v/255)*25;
-
-led.style.height=h+"px";
-
-led.style.background=
-v>200?"#33ff33":
-v>120?"#ff0000":
-v>70?"#0000ff":
-"#225500";
-
-});
+loadStream();
 
 }
 
 
-/* ================= PLAY BUTTON ================= */
+/* ================= PLAY ================= */
 
 btn.onclick=async()=>{
 
-initAudio();
-
-if(audioCtx.state==="suspended"){
-await audioCtx.resume();
-}
-
 if(!playing){
 
-bufferTxt.style.display="block";
 statusTxt.textContent="Menghubungkan...";
 
-audio.src=STREAM_URL+"?t="+Date.now();
+loadStream();
 
 try{
 
@@ -311,10 +220,12 @@ reconnect();
 }else{
 
 audio.pause();
-playing=false;
+
+lamp.classList.remove("on");
 
 btn.textContent="▶";
-lamp.classList.remove("on");
+
+playing=false;
 
 }
 
@@ -325,11 +236,9 @@ lamp.classList.remove("on");
 
 function reconnect(){
 
-statusTxt.textContent="Reconnect...";
+nextServer();
 
 setTimeout(()=>{
-
-audio.src=STREAM_URL+"?t="+Date.now();
 
 audio.play().catch(()=>{});
 
@@ -340,17 +249,15 @@ retryDelay=Math.min(retryDelay*1.5,20000);
 }
 
 
-/* ================= AUDIO EVENTS ================= */
+/* ================= EVENTS ================= */
 
 audio.addEventListener("playing",()=>{
 
 playing=true;
 
-btn.textContent="🧭";
-
 lamp.classList.add("on");
 
-bufferTxt.style.display="none";
+btn.textContent="⏸";
 
 statusTxt.textContent="🔴 LIVE";
 
@@ -360,8 +267,6 @@ retryDelay=3000;
 
 
 audio.addEventListener("waiting",()=>{
-
-bufferTxt.style.display="block";
 
 statusTxt.textContent="Buffering...";
 
@@ -392,7 +297,7 @@ lastTime=audio.currentTime;
 },15000);
 
 
-/* ================= NETWORK CHANGE ================= */
+/* ================= NETWORK ================= */
 
 window.addEventListener("online",reconnect);
 
@@ -410,6 +315,7 @@ async function metadata(){
 try{
 
 const res=await fetch(META_URL,{cache:"no-store"});
+
 const data=await res.json();
 
 let src=data.icestats.source;
@@ -419,7 +325,7 @@ if(Array.isArray(src)) src=src[0];
 songTxt.textContent=
 src.title||
 src.song||
-"Audio Stereo";
+"Streaming Audio";
 
 }catch{}
 
@@ -427,33 +333,7 @@ src.song||
 
 setInterval(metadata,10000);
 
-
-/* ================= ANDROID KEEP ALIVE ================= */
-
-document.addEventListener("visibilitychange",()=>{
-
-if(document.visibilityState==="visible"){
-
-if(audioCtx && audioCtx.state==="suspended"){
-audioCtx.resume();
-}
-
-}
-
-});
-
-
-setInterval(()=>{
-
-if(audioCtx && audioCtx.state==="suspended"){
-audioCtx.resume();
-}
-
-},5000);
-
 </script>
 
 </body>
 </html>
-
-
