@@ -40,10 +40,10 @@ body{
 <body>
 
 <div class="radio-box">
-  <div class="radio-title">📻 Haza Radio</div>
+  <div class="radio-title">📻 Musik Nostalgia</div>
   <div id="lamp" class="light"></div>
   <div id="playBtn" class="btn">▶</div>
-  <div id="radioStatus" class="status">Siap Memutar</div>
+  <div id="radioStatus" class="status">Selamat Datang</div>
   <div id="songTitle" class="status">—</div>
 
   <div class="vu">
@@ -59,8 +59,8 @@ body{
 /* ================= MULTI SERVER ================= */
 const STREAMS = [
   "https://b.alhastream.com:5044/radio",
-  "https://backup1.server.com:8000/radio",
-  "https://backup2.server.com:8000/radio"
+  "https://b.alhastream.com:5044/radio",
+  "https://b.alhastream.com:5044/radio"
 ];
 const META_URL = "https://b.alhastream.com:5044/status-json.xsl";
 
@@ -148,7 +148,7 @@ function reconnect(){
 audio.addEventListener("playing",()=>{
   playing=true;
   lamp.classList.add("on");
-  btn.textContent="⏸";
+  btn.textContent="🚀";
   statusTxt.textContent="🔴 LIVE";
   retryDelay=3000;
 });
@@ -175,7 +175,7 @@ async function metadata(){
     const data = await res.json();
     let src = data.icestats.source;
     if(Array.isArray(src)) src = src[0];
-    songTxt.textContent = src.title||src.song||"Streaming Audio";
+    songTxt.textContent = src.title||src.song||"Audio Stereo";
   }catch{}
 }
 setInterval(metadata,10000);
@@ -191,4 +191,5 @@ setInterval(()=>{
 </script>
 </body>
 </html>
+
 
