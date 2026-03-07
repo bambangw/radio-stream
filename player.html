@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<title>Haza Radio — Kulon Progo V3</title>
+<title>Haza Radio — Kulon Progo V4</title>
 
 <style>
 body {
@@ -621,9 +621,6 @@ setInterval(fetchMetadata,METADATA_INTERVAL);
 
 
 
-// ================= UPDATE LOOP =================
-setInterval(fetchMetadata, 8000);
-
 // ================= AUDIO STATUS SYNC =================
 audio.addEventListener("playing", () => {
   setStatus("🔴 LIVE");
@@ -655,6 +652,7 @@ audio.addEventListener("pause", () => {
 
 </body>
 </html>
+
 
 
 
