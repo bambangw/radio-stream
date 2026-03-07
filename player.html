@@ -43,8 +43,8 @@ body{
   <div class="radio-title">📻 Musik Nostalgia</div>
   <div id="lamp" class="light"></div>
   <div id="playBtn" class="btn">▶</div>
-  <div id="radioStatus" class="status">Selamat Datang</div>
-  <div id="songTitle" class="status">Audio Stereo</div>
+  <div id="radioStatus" class="status">Selamat Bergabung</div>
+  <div id="songTitle" class="status">Haza Radio</div>
 
   <div class="vu">
     <div class="led"></div><div class="led"></div><div class="led"></div>
@@ -87,7 +87,7 @@ function loadStream(){
 function nextServer(){
   serverIndex++;
   if(serverIndex>=STREAMS.length) serverIndex=0;
-  statusTxt.textContent="🔁 Switch Server...";
+  statusTxt.textContent="🔁 Load Server";
   loadStream();
 }
 
@@ -175,7 +175,7 @@ async function metadata(){
     const data = await res.json();
     let src = data.icestats.source;
     if(Array.isArray(src)) src = src[0];
-    songTxt.textContent = src.title||src.song||"Streaming Audio";
+    songTxt.textContent = src.title||src.song||"Audio Stereo";
   }catch{}
 }
 setInterval(metadata,10000);
@@ -191,6 +191,5 @@ setInterval(()=>{
 </script>
 </body>
 </html>
-
 
 
