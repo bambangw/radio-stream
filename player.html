@@ -2,395 +2,663 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<title>Haza Radio Vintage</title>
+<title>Haza Radio — Kulon Progo V5</title>
 
 <style>
-
-body{
-background:#161616;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
-font-family:Arial;
+body {
+  background:#222;
+  font-family: Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  margin:0;
+  padding-top:20px;
 }
 
-/* RADIO BODY */
-
-.radio{
-width:560px;
-height:330px;
-background:linear-gradient(#7c5329,#4b2f16);
-border-radius:25px;
-border:8px solid #2a170c;
-box-shadow:
-0 0 40px rgba(0,0,0,.9),
-inset 0 0 40px rgba(0,0,0,.6);
-padding:20px;
-color:#ffe7b3;
-position:relative;
+/* === Radio Premium Box === */
+.radio-box {
+  width: 460px;
+  padding: 30px;
+  border-radius: 25px;
+  background: url('https://bambangw.github.io/radio-stream/889.jpg');
+  background-size: cover;
+  background-position:center;
+  box-shadow:
+    0 0 25px rgba(0,0,0,.6),
+    inset 0 0 40px rgba(0,0,0,.4);
+  border: 7px solid #3b2713;
+  text-align:center;
+  color:#f9e7c9;
 }
 
-/* TITLE */
-
-.title{
-text-align:center;
-font-size:26px;
-font-weight:bold;
-letter-spacing:2px;
+/* === Judul === */
+.radio-title {
+  font-size:26px;
+  font-weight:bold;
+  margin-bottom:10px;
+  text-shadow:0 0 5px rgba(0,0,0,.7);
 }
 
-/* TUBE LIGHT */
-
-.tube{
-position:absolute;
-top:18px;
-left:20px;
-width:22px;
-height:22px;
-border-radius:50%;
-background:#400;
-box-shadow:0 0 8px #600;
+/* === Lampu indikator === */
+.light {
+  width:20px;
+  height:20px;
+  background:#800;
+  border-radius:50%;
+  margin:10px auto 20px;
+  box-shadow:0 0 10px #b00;
 }
 
-.tube.on{
-background:#ffb347;
-box-shadow:0 0 20px #ffb347;
+.light.on {
+  background:#3aff57;
+  box-shadow:0 0 12px #3aff57;
 }
 
-/* DIAL */
-
-.dial{
-width:320px;
-height:90px;
-margin-top:15px;
-background:#0e0e0e;
-border-radius:12px;
-border:3px solid #000;
-position:relative;
-overflow:hidden;
+/* === Tombol Play/Pause === */
+.btn-pp {
+  width:95px;
+  height:95px;
+  background:#c49b63;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  font-size:30px;
+  box-shadow:
+    0 0 10px rgba(0,0,0,.6),
+    inset 0 0 12px rgba(255,255,255,.3);
+  margin:20px auto;
+  color:white;
+  transition:.2s;
 }
 
-/* SCALE */
-
-.scale{
-position:absolute;
-width:200%;
-height:100%;
-background:
-repeating-linear-gradient(
-to right,
-transparent,
-transparent 28px,
-#aaa 30px
-);
-opacity:.7;
+.btn-pp:hover {
+  transform:scale(1.08);
 }
 
-/* NEEDLE */
-
-.needle{
-position:absolute;
-left:50%;
-top:0;
-width:3px;
-height:100%;
-background:#ff3333;
-box-shadow:0 0 8px red;
-transition:0.3s;
+/* === VU METER LED === */
+.vu-container {
+  display:flex;
+  justify-content:center;
+  gap:4px;
+  margin-top:25px;
 }
 
-/* SPEAKER */
-
-.speaker{
-position:absolute;
-right:25px;
-top:80px;
-width:150px;
-height:150px;
-border-radius:50%;
-background:radial-gradient(#222,#000);
-box-shadow:
-inset 0 0 20px #000;
+.led {
+  width:8px;
+  height:30px;
+  background:#330000;
+  border-radius:3px;
+  transition:height .1s ease, background .1s ease;
+  box-shadow:0 0 3px #000;
 }
-
-/* SPEAKER PULSE */
-
-.speaker.pulse{
-animation:speak 0.15s infinite alternate;
-}
-
-@keyframes speak{
-from{transform:scale(1)}
-to{transform:scale(1.02)}
-}
-
-/* PLAY BUTTON */
-
-.play{
-margin-top:18px;
-width:90px;
-height:90px;
-background:#c49b63;
-border-radius:50%;
-display:flex;
-justify-content:center;
-align-items:center;
-font-size:32px;
-cursor:pointer;
-box-shadow:
-0 0 10px #000,
-inset 0 0 12px rgba(255,255,255,.3);
-}
-
-/* KNOB */
-
-.knob{
-position:absolute;
-bottom:20px;
-right:40px;
-width:60px;
-height:60px;
-border-radius:50%;
-background:radial-gradient(#bbb,#555);
-box-shadow:
-0 0 10px #000,
-inset 0 0 6px #fff;
-cursor:pointer;
-}
-
-.knob:after{
-content:"";
-position:absolute;
-top:10px;
-left:28px;
-width:4px;
-height:18px;
-background:#222;
-}
-
-/* SONG TEXT */
-
-.song{
-margin-top:10px;
-font-size:14px;
-overflow:hidden;
-white-space:nowrap;
-}
-
-.song span{
-display:inline-block;
-padding-left:100%;
-animation:scroll 12s linear infinite;
-}
-
-@keyframes scroll{
-0%{transform:translateX(0)}
-100%{transform:translateX(-100%)}
-}
-
-/* VU */
-
-.vu{
-display:flex;
-gap:4px;
-margin-top:10px;
-}
-
-.led{
-width:7px;
-height:20px;
-background:#330000;
-border-radius:2px;
-transition:0.1s;
-}
-
 </style>
 </head>
 
 <body>
 
-<div class="radio">
+<div class="radio-box">
 
-<div id="tube" class="tube"></div>
+  <div class="radio-title">📻 Musik Nostalgia</div>
 
-<div class="title">📻 HAZA RADIO</div>
+  <div id="lamp" class="light"></div>
 
-<div class="dial">
-<div class="scale"></div>
-<div id="needle" class="needle"></div>
-</div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:15px;">
 
-<div style="display:flex;gap:20px;align-items:center">
+  <div id="ppBtn" class="btn-pp">▶</div>
 
-<div id="playBtn" class="play">▶</div>
-
-<div>
-
-<div id="status">Siap Memutar</div>
-
-<div class="song">
-<span id="songTitle">Haza Radio Nostalgia Indonesia</span>
-</div>
-
-<div class="vu">
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-<div class="led"></div>
-</div>
+  <div id="streamInfo" style="
+    width:180px;
+    text-align:left;
+    font-size:13px;
+    color:#ffe9b3;
+    text-shadow:0 0 5px #000;
+    line-height:1.4;
+  ">
+    <div id="radioStatus">⏳ Monggo Pinarak</div>
+    <div id="songTitle" style="font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+      —
+    </div>
+  </div>
 
 </div>
 
+
+<div id="bufferStatus" style="
+  margin-top:10px;
+  font-size:14px;
+  color:#ffe9b3;
+  text-shadow:0 0 5px #000;
+  display:none;">
+  Buffering 0%
+</div>
+<div id="bitrateStatus" style="
+  margin-top:4px;
+  font-size:13px;
+  color:#9dff9d;
+  text-shadow:0 0 5px #000;
+  display:none;">
+  Bitrate: -- kbps
 </div>
 
-<div id="speaker" class="speaker"></div>
 
-<div id="knob" class="knob"></div>
 
-<audio id="audio" preload="none"></audio>
+  <!-- VU METER -->
+  <div class="vu-container">
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+    <div class="led"></div>
+  </div>
+
+  <audio id="radio" preload="auto" crossorigin="anonymous"></audio>
 
 </div>
+
+
 
 <script>
 
-const STREAM="https://b.alhastream.com:5044/radio";
+// ================= KONFIGURASI =================
 
-const audio=document.getElementById("audio");
-const btn=document.getElementById("playBtn");
-const tube=document.getElementById("tube");
-const needle=document.getElementById("needle");
-const speaker=document.getElementById("speaker");
-const knob=document.getElementById("knob");
+// STREAM UTAMA
+const STREAM_PRIMARY = "https://b.alhastream.com:5044/radio";
 
-const leds=document.querySelectorAll(".led");
+// STREAM CADANGAN (jika ada)
+const STREAM_BACKUP = "https://b.alhastream.com:5044/radio";
 
-let ctx, analyser, data;
+// METADATA ICECAST
+const ICECAST_STATUS_URL =
+"https://b.alhastream.com:5044/status-json.xsl";
 
-audio.src=STREAM;
 
-// PLAY BUTTON
+// ================= SETTING =================
 
-btn.onclick=async()=>{
+const RETRY_BASE = 4000;
+const RETRY_MAX = 60000;
 
-if(!ctx){
+const FREEZE_CHECK = 20000;
+const NETWORK_TIMEOUT = 15000;
 
-ctx=new AudioContext();
+const METADATA_INTERVAL = 10000;
 
-const src=ctx.createMediaElementSource(audio);
 
-analyser=ctx.createAnalyser();
-analyser.fftSize=64;
+// ================= ELEMENT =================
 
-data=new Uint8Array(analyser.frequencyBinCount);
+const audio = document.getElementById("radio");
+const lamp = document.getElementById("lamp");
+const btn = document.getElementById("ppBtn");
 
-src.connect(analyser);
-analyser.connect(ctx.destination);
+const leds = document.querySelectorAll(".led");
 
-animate();
+const bufferTxt = document.getElementById("bufferStatus");
+const bitrateTxt = document.getElementById("bitrateStatus");
+
+const radioStatus = document.getElementById("radioStatus");
+const songTitle = document.getElementById("songTitle");
+
+
+// ================= STATE =================
+
+let audioCtx;
+let analyser;
+let sourceNode;
+let dataArray;
+
+let isPlaying = false;
+
+let retryDelay = RETRY_BASE;
+
+let currentStream = 0;
+
+let streams = [
+STREAM_PRIMARY,
+STREAM_BACKUP
+];
+
+let lastTime = 0;
+
+let networkTimer;
+
+
+// ================= STREAM =================
+
+function setStream(){
+
+const url = streams[currentStream] + "?nocache=" + Date.now();
+
+audio.src = url;
+audio.load();
 
 }
 
-if(audio.paused){
+audio.preload="none";
+audio.crossOrigin="anonymous";
+
+setStream();
+
+
+// ================= AUDIO ENGINE =================
+
+function initAudio(){
+
+if(audioCtx) return;
+
+audioCtx = new (window.AudioContext ||
+window.webkitAudioContext)({
+latencyHint:"playback"
+});
+
+sourceNode = audioCtx.createMediaElementSource(audio);
+
+analyser = audioCtx.createAnalyser();
+analyser.fftSize = 64;
+
+dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+sourceNode.connect(analyser);
+analyser.connect(audioCtx.destination);
+
+animateVU();
+
+}
+
+
+// ================= PLAY BUTTON =================
+
+btn.onclick = async ()=>{
+
+initAudio();
+
+if(audioCtx.state==="suspended"){
+await audioCtx.resume();
+}
+
+if(!isPlaying){
+
+showBuffer(0);
+
+try{
 
 await audio.play();
 
-btn.textContent="❚❚";
+}catch{
 
-tube.classList.add("on");
+scheduleReconnect();
 
-speaker.classList.add("pulse");
-
-document.getElementById("status").textContent="🔴 LIVE";
-
-moveNeedle();
+}
 
 }else{
 
 audio.pause();
 
+lamp.classList.remove("on");
+
 btn.textContent="▶";
 
-tube.classList.remove("on");
-
-speaker.classList.remove("pulse");
-
-document.getElementById("status").textContent="⏸ Pause";
+isPlaying=false;
 
 }
 
 };
 
-// NEEDLE ANIMATION
 
-function moveNeedle(){
+// ================= BUFFER =================
 
-setInterval(()=>{
+function showBuffer(p){
 
-if(!audio.paused){
-
-let pos=45+Math.random()*10;
-
-needle.style.left=pos+"%";
+bufferTxt.style.display="block";
+bufferTxt.textContent="Buffering "+p+"%";
 
 }
 
-},800);
+function hideBuffer(){
+
+bufferTxt.style.display="none";
 
 }
 
-// VU METER
 
-function animate(){
+// ================= VU METER =================
 
-requestAnimationFrame(animate);
+function animateVU(){
 
-if(!analyser) return;
+requestAnimationFrame(animateVU);
 
-analyser.getByteFrequencyData(data);
+if(!analyser || !isPlaying) return;
+
+analyser.getByteFrequencyData(dataArray);
 
 leds.forEach((led,i)=>{
 
-let v=data[i];
+let v=dataArray[i]||0;
 
-led.style.height=(10+(v/255)*25)+"px";
+let h=10+(v/255)*30;
 
-led.style.background=
+led.style.height=h+"px";
+
+led.style.background =
 v>200?"#33ff33":
 v>140?"#ff0000":
-v>80?"#ffaa00":
-"#330000";
+v>80 ?"#0000ff":
+"#225500";
 
 });
 
 }
 
-// VOLUME KNOB
 
-let angle=0;
+// ================= HARD RESET =================
 
-knob.onwheel=(e)=>{
+function resetAudio(){
 
-e.preventDefault();
+audio.pause();
 
-angle+=e.deltaY>0?-5:5;
+audio.removeAttribute("src");
 
-angle=Math.max(-135,Math.min(135,angle));
+audio.load();
 
-knob.style.transform="rotate("+angle+"deg)";
+setTimeout(()=>{
 
-let vol=(angle+135)/270;
+setStream();
 
-audio.volume=vol;
+},800);
 
-};
+}
+
+
+// ================= SWITCH SERVER =================
+
+function switchStream(){
+
+currentStream++;
+
+if(currentStream>=streams.length){
+currentStream=0;
+}
+
+setStatus("🔁 Switching Server");
+
+resetAudio();
+
+}
+
+
+// ================= RECONNECT =================
+
+async function reconnect(){
+
+isPlaying=false;
+
+lamp.classList.remove("on");
+
+btn.textContent="▶";
+
+showBuffer(0);
+
+switchStream();
+
+await new Promise(r=>setTimeout(r,2000));
+
+try{
+
+await audio.play();
+
+}catch{
+
+scheduleReconnect();
+
+}
+
+}
+
+
+// ================= RETRY =================
+
+function scheduleReconnect(){
+
+setTimeout(reconnect,retryDelay);
+
+retryDelay=Math.min(retryDelay*1.7,RETRY_MAX);
+
+}
+
+
+// ================= NETWORK WATCHDOG =================
+
+function resetNetworkTimer(){
+
+clearTimeout(networkTimer);
+
+networkTimer=setTimeout(()=>{
+
+if(isPlaying){
+
+reconnect();
+
+}
+
+},NETWORK_TIMEOUT);
+
+}
+
+
+// ================= AUDIO EVENTS =================
+
+audio.addEventListener("waiting",()=>{
+
+showBuffer(20);
+
+setStatus("⏳ Buffering");
+
+resetNetworkTimer();
+
+});
+
+audio.addEventListener("stalled",()=>{
+
+showBuffer(30);
+
+setStatus("🔄 Reconnecting");
+
+resetNetworkTimer();
+
+});
+
+audio.addEventListener("canplay",()=>{
+
+showBuffer(70);
+
+});
+
+audio.addEventListener("playing",()=>{
+
+hideBuffer();
+
+lamp.classList.add("on");
+
+btn.textContent="🧭";
+
+retryDelay=RETRY_BASE;
+
+isPlaying=true;
+
+setStatus("🔴 LIVE");
+
+resetNetworkTimer();
+
+});
+
+audio.addEventListener("pause",()=>{
+
+setStatus("⏸ Paused");
+
+});
+
+audio.addEventListener("error",scheduleReconnect);
+audio.addEventListener("ended",scheduleReconnect);
+
+
+// ================= FREEZE DETECTOR =================
+
+setInterval(()=>{
+
+if(!isPlaying) return;
+
+if(audio.currentTime===lastTime){
+
+reconnect();
+
+}
+
+lastTime=audio.currentTime;
+
+},FREEZE_CHECK);
+
+
+// ================= BITRATE =================
+
+let lastBytes=0;
+let lastBitrateTime=Date.now();
+
+function showBitrate(kbps){
+
+bitrateTxt.style.display="block";
+bitrateTxt.textContent="Bitrate: "+kbps+" kbps";
+
+}
+
+setInterval(()=>{
+
+if(audio.readyState<2 || audio.paused) return;
+
+try{
+
+if(audio.buffered.length){
+
+const bufferedEnd=audio.buffered.end(0);
+
+const now=Date.now();
+
+const deltaTime=(now-lastBitrateTime)/1000;
+
+if(deltaTime>0){
+
+const estimatedBytes=bufferedEnd*44100*2*2;
+
+const deltaBytes=estimatedBytes-lastBytes;
+
+const kbps=Math.max(
+32,
+Math.round((deltaBytes*8)/1000/deltaTime)
+);
+
+showBitrate(kbps);
+
+lastBytes=estimatedBytes;
+
+lastBitrateTime=now;
+
+}
+
+}
+
+}catch{}
+
+},3000);
+
+
+// ================= STATUS =================
+
+function setStatus(txt){
+
+radioStatus.textContent = txt;
+
+}
+
+
+// ================= METADATA =================
+
+async function fetchMetadata(){
+
+try{
+
+const res = await fetch(
+ICECAST_STATUS_URL,
+{cache:"no-store"}
+);
+
+const data = await res.json();
+
+let source = data.icestats.source;
+
+if(Array.isArray(source)){
+source = source[0];
+}
+
+if(source){
+
+songTitle.textContent =
+source.title ||
+source.song ||
+"Audio Stereo";
+
+}
+
+}catch{
+
+songTitle.textContent="—";
+
+}
+
+}
+
+setInterval(fetchMetadata,METADATA_INTERVAL);
 
 </script>
+<script>
+
+// ================= AUDIO STATUS SYNC =================
+audio.addEventListener("playing", () => {
+  setStatus("🔴 LIVE");
+  fetchMetadata();
+});
+
+audio.addEventListener("waiting", () => {
+  setStatus("⏳ Selamat Datang");
+});
+
+audio.addEventListener("stalled", () => {
+  setStatus("🔄 Menghubungkan");
+});
+
+audio.addEventListener("error", () => {
+  setStatus("❌ Menunggu Jaringan");
+});
+
+audio.addEventListener("pause", () => {
+  setStatus("⏸ Memulihkan");
+});
+  
+</script>
+
+
+
+
+
 
 </body>
 </html>
+
+
+
+
+
+
+
