@@ -44,7 +44,7 @@ body{
   <div id="lamp" class="light"></div>
   <div id="playBtn" class="btn">▶</div>
   <div id="radioStatus" class="status">Selamat Datang</div>
-  <div id="songTitle" class="status">—</div>
+  <div id="songTitle" class="status">Audio Stereo</div>
 
   <div class="vu">
     <div class="led"></div><div class="led"></div><div class="led"></div>
@@ -175,7 +175,7 @@ async function metadata(){
     const data = await res.json();
     let src = data.icestats.source;
     if(Array.isArray(src)) src = src[0];
-    songTxt.textContent = src.title||src.song||"Audio Stereo";
+    songTxt.textContent = src.title||src.song||"Streaming Audio";
   }catch{}
 }
 setInterval(metadata,10000);
@@ -191,5 +191,6 @@ setInterval(()=>{
 </script>
 </body>
 </html>
+
 
 
