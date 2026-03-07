@@ -2,12 +2,12 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<title>Haza Radio V5</title>
+<title>Haza Radio Vintage</title>
 
 <style>
 
 body{
-background:#1b1b1b;
+background:#161616;
 display:flex;
 justify-content:center;
 align-items:center;
@@ -19,58 +19,60 @@ font-family:Arial;
 /* RADIO BODY */
 
 .radio{
-width:520px;
-height:300px;
-background:linear-gradient(#7b532b,#4a2f16);
+width:560px;
+height:330px;
+background:linear-gradient(#7c5329,#4b2f16);
 border-radius:25px;
+border:8px solid #2a170c;
 box-shadow:
-0 0 40px rgba(0,0,0,.8),
-inset 0 0 40px rgba(0,0,0,.5);
-border:8px solid #2d1b0f;
+0 0 40px rgba(0,0,0,.9),
+inset 0 0 40px rgba(0,0,0,.6);
 padding:20px;
-color:#ffe9b3;
+color:#ffe7b3;
 position:relative;
 }
 
-/* RADIO TITLE */
+/* TITLE */
 
 .title{
 text-align:center;
-font-size:24px;
+font-size:26px;
 font-weight:bold;
-margin-bottom:10px;
+letter-spacing:2px;
 }
 
-/* SPEAKER */
+/* TUBE LIGHT */
 
-.speaker{
+.tube{
 position:absolute;
-right:25px;
-top:70px;
-width:140px;
-height:140px;
-background:
-radial-gradient(#111,#000);
+top:18px;
+left:20px;
+width:22px;
+height:22px;
 border-radius:50%;
-box-shadow:
-inset 0 0 20px #000,
-0 0 10px #000;
+background:#400;
+box-shadow:0 0 8px #600;
 }
 
-/* DIAL WINDOW */
+.tube.on{
+background:#ffb347;
+box-shadow:0 0 20px #ffb347;
+}
+
+/* DIAL */
 
 .dial{
-width:280px;
-height:80px;
-background:#111;
-border-radius:10px;
-margin-top:10px;
+width:320px;
+height:90px;
+margin-top:15px;
+background:#0e0e0e;
+border-radius:12px;
+border:3px solid #000;
 position:relative;
 overflow:hidden;
-border:3px solid #000;
 }
 
-/* FREQUENCY SCALE */
+/* SCALE */
 
 .scale{
 position:absolute;
@@ -81,78 +83,91 @@ repeating-linear-gradient(
 to right,
 transparent,
 transparent 28px,
-#999 30px
+#aaa 30px
 );
-animation:dialmove 8s linear infinite;
-opacity:.6;
+opacity:.7;
 }
 
-@keyframes dialmove{
-0%{transform:translateX(0)}
-100%{transform:translateX(-50%)}
-}
-
-/* DIAL NEEDLE */
+/* NEEDLE */
 
 .needle{
 position:absolute;
 left:50%;
 top:0;
-width:2px;
+width:3px;
 height:100%;
-background:#ff3b3b;
-box-shadow:0 0 6px red;
+background:#ff3333;
+box-shadow:0 0 8px red;
+transition:0.3s;
+}
+
+/* SPEAKER */
+
+.speaker{
+position:absolute;
+right:25px;
+top:80px;
+width:150px;
+height:150px;
+border-radius:50%;
+background:radial-gradient(#222,#000);
+box-shadow:
+inset 0 0 20px #000;
+}
+
+/* SPEAKER PULSE */
+
+.speaker.pulse{
+animation:speak 0.15s infinite alternate;
+}
+
+@keyframes speak{
+from{transform:scale(1)}
+to{transform:scale(1.02)}
 }
 
 /* PLAY BUTTON */
 
 .play{
-margin-top:20px;
+margin-top:18px;
 width:90px;
 height:90px;
-border-radius:50%;
 background:#c49b63;
+border-radius:50%;
 display:flex;
 justify-content:center;
 align-items:center;
-font-size:30px;
+font-size:32px;
 cursor:pointer;
 box-shadow:
 0 0 10px #000,
-inset 0 0 10px rgba(255,255,255,.4);
+inset 0 0 12px rgba(255,255,255,.3);
 }
 
-/* POWER LIGHT */
+/* KNOB */
 
-.light{
+.knob{
 position:absolute;
-left:20px;
-top:20px;
-width:18px;
-height:18px;
-background:#600;
+bottom:20px;
+right:40px;
+width:60px;
+height:60px;
 border-radius:50%;
-box-shadow:0 0 8px #900;
+background:radial-gradient(#bbb,#555);
+box-shadow:
+0 0 10px #000,
+inset 0 0 6px #fff;
+cursor:pointer;
 }
 
-.light.on{
-background:#3aff57;
-box-shadow:0 0 12px #3aff57;
-}
-
-/* VU METER */
-
-.vu{
-display:flex;
-gap:4px;
-margin-top:15px;
-}
-
-.led{
-width:8px;
-height:20px;
-background:#330000;
-border-radius:2px;
+.knob:after{
+content:"";
+position:absolute;
+top:10px;
+left:28px;
+width:4px;
+height:18px;
+background:#222;
 }
 
 /* SONG TEXT */
@@ -160,19 +175,35 @@ border-radius:2px;
 .song{
 margin-top:10px;
 font-size:14px;
-white-space:nowrap;
 overflow:hidden;
+white-space:nowrap;
 }
 
 .song span{
 display:inline-block;
 padding-left:100%;
-animation:scroll 10s linear infinite;
+animation:scroll 12s linear infinite;
 }
 
 @keyframes scroll{
 0%{transform:translateX(0)}
 100%{transform:translateX(-100%)}
+}
+
+/* VU */
+
+.vu{
+display:flex;
+gap:4px;
+margin-top:10px;
+}
+
+.led{
+width:7px;
+height:20px;
+background:#330000;
+border-radius:2px;
+transition:0.1s;
 }
 
 </style>
@@ -182,13 +213,13 @@ animation:scroll 10s linear infinite;
 
 <div class="radio">
 
-<div class="light" id="lamp"></div>
+<div id="tube" class="tube"></div>
 
-<div class="title">📻 Haza Radio</div>
+<div class="title">📻 HAZA RADIO</div>
 
 <div class="dial">
 <div class="scale"></div>
-<div class="needle"></div>
+<div id="needle" class="needle"></div>
 </div>
 
 <div style="display:flex;gap:20px;align-items:center">
@@ -200,10 +231,10 @@ animation:scroll 10s linear infinite;
 <div id="status">Siap Memutar</div>
 
 <div class="song">
-<span id="songTitle">Haza Radio Nostalgia</span>
+<span id="songTitle">Haza Radio Nostalgia Indonesia</span>
 </div>
 
-<div class="vu" id="vu">
+<div class="vu">
 <div class="led"></div>
 <div class="led"></div>
 <div class="led"></div>
@@ -218,9 +249,11 @@ animation:scroll 10s linear infinite;
 
 </div>
 
-<div class="speaker"></div>
+<div id="speaker" class="speaker"></div>
 
-<audio id="audio"></audio>
+<div id="knob" class="knob"></div>
+
+<audio id="audio" preload="none"></audio>
 
 </div>
 
@@ -230,18 +263,25 @@ const STREAM="https://b.alhastream.com:5044/radio";
 
 const audio=document.getElementById("audio");
 const btn=document.getElementById("playBtn");
-const lamp=document.getElementById("lamp");
+const tube=document.getElementById("tube");
+const needle=document.getElementById("needle");
+const speaker=document.getElementById("speaker");
+const knob=document.getElementById("knob");
+
 const leds=document.querySelectorAll(".led");
 
 let ctx, analyser, data;
 
 audio.src=STREAM;
 
+// PLAY BUTTON
+
 btn.onclick=async()=>{
 
 if(!ctx){
 
 ctx=new AudioContext();
+
 const src=ctx.createMediaElementSource(audio);
 
 analyser=ctx.createAnalyser();
@@ -260,21 +300,51 @@ if(audio.paused){
 
 await audio.play();
 
-lamp.classList.add("on");
-
 btn.textContent="❚❚";
+
+tube.classList.add("on");
+
+speaker.classList.add("pulse");
+
+document.getElementById("status").textContent="🔴 LIVE";
+
+moveNeedle();
 
 }else{
 
 audio.pause();
 
-lamp.classList.remove("on");
-
 btn.textContent="▶";
 
-}
+tube.classList.remove("on");
+
+speaker.classList.remove("pulse");
+
+document.getElementById("status").textContent="⏸ Pause";
 
 }
+
+};
+
+// NEEDLE ANIMATION
+
+function moveNeedle(){
+
+setInterval(()=>{
+
+if(!audio.paused){
+
+let pos=45+Math.random()*10;
+
+needle.style.left=pos+"%";
+
+}
+
+},800);
+
+}
+
+// VU METER
 
 function animate(){
 
@@ -299,6 +369,26 @@ v>80?"#ffaa00":
 });
 
 }
+
+// VOLUME KNOB
+
+let angle=0;
+
+knob.onwheel=(e)=>{
+
+e.preventDefault();
+
+angle+=e.deltaY>0?-5:5;
+
+angle=Math.max(-135,Math.min(135,angle));
+
+knob.style.transform="rotate("+angle+"deg)";
+
+let vol=(angle+135)/270;
+
+audio.volume=vol;
+
+};
 
 </script>
 
