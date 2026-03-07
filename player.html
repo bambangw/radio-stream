@@ -165,8 +165,18 @@ body {
 
 // ================= KONFIGURASI =================
 
-const STREAM_URL = "https://b.alhastream.com:5044/radio";
-const ICECAST_STATUS_URL = "https://b.alhastream.com:5044/status-json.xsl";
+// STREAM UTAMA
+const STREAM_PRIMARY = "https://b.alhastream.com:5044/radio";
+
+// STREAM BACKUP (boleh sama jika belum punya server kedua)
+const STREAM_BACKUP = "https://b.alhastream.com:5044/radio";
+
+// METADATA ICECAST
+const ICECAST_STATUS_URL =
+"https://b.alhastream.com:5044/status-json.xsl";
+
+
+// ================= SETTING =================
 
 const RETRY_BASE = 4000;
 const RETRY_MAX = 60000;
@@ -180,16 +190,16 @@ const METADATA_INTERVAL = 10000;
 // ================= ELEMENT =================
 
 const audio = document.getElementById("radio");
-const lamp = document.getElementById("lamp");
-const btn = document.getElementById("ppBtn");
+const lamp  = document.getElementById("lamp");
+const btn   = document.getElementById("ppBtn");
 
-const leds = document.querySelectorAll(".led");
+const leds  = document.querySelectorAll(".led");
 
-const bufferTxt = document.getElementById("bufferStatus");
+const bufferTxt  = document.getElementById("bufferStatus");
 const bitrateTxt = document.getElementById("bitrateStatus");
 
 const radioStatus = document.getElementById("radioStatus");
-const songTitle = document.getElementById("songTitle");
+const songTitle   = document.getElementById("songTitle");
 
 
 // ================= STATE =================
@@ -199,26 +209,35 @@ let analyser;
 let sourceNode;
 let dataArray;
 
+let isPlaying = false;
+
 let retryDelay = RETRY_BASE;
 
-let isPlaying = false;
+let currentStream = 0;
+
+let streams = [
+STREAM_PRIMARY,
+STREAM_BACKUP
+];
 
 let lastTime = 0;
 
 let networkTimer;
 
 
-// ================= STREAM SETUP =================
+// ================= SET STREAM =================
 
 function setStream(){
 
-audio.src = STREAM_URL + "?t=" + Date.now();
+const url = streams[currentStream] + "?t=" + Date.now();
+
+audio.src = url;
 audio.load();
 
 }
 
-audio.preload = "none";
-audio.crossOrigin = "anonymous";
+audio.preload="none";
+audio.crossOrigin="anonymous";
 
 setStream();
 
@@ -229,18 +248,21 @@ function initAudio(){
 
 if(audioCtx) return;
 
-audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+audioCtx = new (window.AudioContext ||
+window.webkitAudioContext)({
 latencyHint:"playback"
 });
 
 sourceNode = audioCtx.createMediaElementSource(audio);
 
 analyser = audioCtx.createAnalyser();
+
 analyser.fftSize = 64;
 
 dataArray = new Uint8Array(analyser.frequencyBinCount);
 
 sourceNode.connect(analyser);
+
 analyser.connect(audioCtx.destination);
 
 animateVU();
@@ -248,16 +270,14 @@ animateVU();
 }
 
 
-// ================= PLAY / PAUSE =================
+// ================= PLAY BUTTON =================
 
 btn.onclick = async ()=>{
 
 initAudio();
 
-if(audioCtx.state === "suspended"){
-
+if(audioCtx.state==="suspended"){
 await audioCtx.resume();
-
 }
 
 if(!isPlaying){
@@ -277,11 +297,12 @@ scheduleReconnect();
 }else{
 
 audio.pause();
-isPlaying=false;
 
 lamp.classList.remove("on");
 
 btn.textContent="▶";
+
+isPlaying=false;
 
 }
 
@@ -347,7 +368,24 @@ setTimeout(()=>{
 
 setStream();
 
-},500);
+},800);
+
+}
+
+
+// ================= STREAM SWITCH =================
+
+function switchStream(){
+
+currentStream++;
+
+if(currentStream>=streams.length){
+currentStream=0;
+}
+
+setStatus("🔁 Switching Server");
+
+resetAudio();
 
 }
 
@@ -364,7 +402,7 @@ btn.textContent="▶";
 
 showBuffer(0);
 
-resetAudio();
+switchStream();
 
 await new Promise(r=>setTimeout(r,2000));
 
@@ -381,7 +419,7 @@ scheduleReconnect();
 }
 
 
-// ================= RETRY SYSTEM =================
+// ================= RETRY =================
 
 function scheduleReconnect(){
 
@@ -484,7 +522,7 @@ lastTime=audio.currentTime;
 },FREEZE_CHECK);
 
 
-// ================= BITRATE ESTIMATION =================
+// ================= BITRATE =================
 
 let lastBytes=0;
 let lastBitrateTime=Date.now();
@@ -493,12 +531,6 @@ function showBitrate(kbps){
 
 bitrateTxt.style.display="block";
 bitrateTxt.textContent="Bitrate: "+kbps+" kbps";
-
-}
-
-function hideBitrate(){
-
-bitrateTxt.style.display="none";
 
 }
 
@@ -522,7 +554,8 @@ const estimatedBytes=bufferedEnd*44100*2*2;
 
 const deltaBytes=estimatedBytes-lastBytes;
 
-const kbps=Math.max(32,Math.round((deltaBytes*8)/1000/deltaTime));
+const kbps=Math.max(32,
+Math.round((deltaBytes*8)/1000/deltaTime));
 
 showBitrate(kbps);
 
@@ -539,7 +572,7 @@ lastBitrateTime=now;
 },3000);
 
 
-// ================= STATUS TEXT =================
+// ================= STATUS =================
 
 function setStatus(txt){
 
@@ -554,17 +587,25 @@ async function fetchMetadata(){
 
 try{
 
-const res=await fetch(ICECAST_STATUS_URL,{cache:"no-store"});
+const res=await fetch(
+ICECAST_STATUS_URL,
+{cache:"no-store"}
+);
 
 const data=await res.json();
 
 let source=data.icestats.source;
 
-if(Array.isArray(source)) source=source[0];
+if(Array.isArray(source)){
+source=source[0];
+}
 
 if(source){
 
-songTitle.textContent=source.title||source.song||"Audio Stereo";
+songTitle.textContent=
+source.title ||
+source.song ||
+"Audio Stereo";
 
 }
 
@@ -614,6 +655,7 @@ audio.addEventListener("pause", () => {
 
 </body>
 </html>
+
 
 
 
