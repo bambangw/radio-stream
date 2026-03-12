@@ -87,7 +87,7 @@ function loadStream(){
 function nextServer(){
   serverIndex++;
   if(serverIndex>=STREAMS.length) serverIndex=0;
-  statusTxt.textContent="🔁 Load Server";
+  statusTxt.textContent="🔁 Memulihkan";
   loadStream();
 }
 
@@ -152,7 +152,7 @@ audio.addEventListener("playing",()=>{
   statusTxt.textContent="🔴 LIVE";
   retryDelay=3000;
 });
-audio.addEventListener("waiting",()=>{ statusTxt.textContent="Buffering..."; });
+audio.addEventListener("waiting",()=>{ statusTxt.textContent="Memeriksa Koneksi"; });
 audio.addEventListener("error",reconnect);
 audio.addEventListener("stalled",reconnect);
 audio.addEventListener("ended",reconnect);
